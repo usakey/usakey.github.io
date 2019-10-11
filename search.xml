@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title><![CDATA[semi-supervised learning in NLP]]></title>
+    <url>%2F2018%2F03%2F22%2Fsemi-supervised-learning-in-NLP%2F</url>
+    <content type="text"><![CDATA[Semi-supervised learning on NLP参考stanford nlp 2018 lecture 17。 Suggested Readings: [Semi-Supervised Sequence Learning] [Learned in Translation: Contextualized Word Vectors] [Deep Contextualized Word Representations] [Adversarial Training Methods for Semi-Supervised Text Classification] 这里讲解三种主要的半监督学习技术： 1. Pre-training 预训练分成两个主要阶段： 首先在无标签样本上的无监督模型 然后将无监督模型的权重迁移到监督模型，再在有标签数据上进行训练（这里有不同模型会在无监督模型的权重上进行fine-tune，有些不会） 流程如下图所示： 大家熟悉的典型例子是Word2Vec： shared part of the model: word embedding； 没有unsupervised-only部分； supervised-only部分是除去word embedding 之外的模型； 下面考虑一下，为何pre-training这种策略可以work呢？ 其实可以将这种预训练当做有监督学习模型的一种更加智能的初始化。换句话说，此时输入模型的不再是raw data，需要模型从中自主学习诸如词义、句义等相关表示，而是直接将这种表示直接作为输入塞入模型。 具体应用到NLP中，“预训练”这种策略是如何生效的呢？一般来说，大多数基于神经网络的NLP应用框架如下所示： 这里Embedding loookup层一般对应于这里的预训练层，当然，目前也有一些其他模型会区分pre-trained encoder和supervised encoder。 下面介绍三种pre-training的策略： 1) Auto-encoder这里应用自编码机的最主要目的是为了获取输入数据中最核心的信息，而“核心信息”的定义这里是基于一个假设：可以被无损重构的信息。在训练完成Auto-encoder之后，去除decoder部分，直接把encoder的结果作为后续神经网络的输入即可。框架如下： 2) CoVe3) ELMo2. Self-training3. Consistency regularization]]></content>
+      <categories>
+        <category>Machine learning</category>
+        <category>NLP</category>
+      </categories>
+      <tags>
+        <tag>NLP</tag>
+        <tag>semi-supervised learning</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[理解Learning to Rank算法]]></title>
+    <url>%2F2017%2F08%2F06%2Funderstanding-Learning-to-Rank%2F</url>
+    <content type="text"><![CDATA[排序学习是一个有监督的机器学习过程，对每一个给定的查询－文档对，抽取特征，通过日志挖掘或者人工标注的方法获得真实数据标注。然后通过排序模型，使得输入能够和实际的数据相似。 1. LTR的流程 Collect Training Data (Queries and their labeled documents) Feature Extraction for Query-document Pairs Learning the Ranking Model by Minimizing a Loss Function on the Training Data Use the Model to Answer Online Queries 2. 训练数据的获取有2种获取训练数据的来源:1）人工标注；2）搜索日志。 1) 人工标注 从搜索日志中随机选取一部分Query，让受过专业训练的数据评估员对”Query-Url对”给出相关性判断。常见的是5档的评分:差、一般、好、优秀、完美。以此作为训练数据。人工标注是标注者的主观判断，会受标注者背景知识等因素的影响。 2) 搜索日志 使用点击日志的偏多。比如，结果ABC分别位于123位，B比A位置低，但却得到了更多的点击，那么B的相关性可能好于A。 3) 公开数据集 现存一批公开的数据集可以使用 LETOR, http://research.microsoft.com/en-us/um/beijing/projects/letor/ Microsoft Learning to Rank Dataset, http://research.microsoft.com/en-us/projects/mslr/ Yahoo Learning to Rank Challenge, http://webscope.sandbox.yahoo.com/ 3. 特征提取（特征工程）搜索引擎会使用一系列特征来决定结果的排序。 feature可以分为： Doc本身的特征：Pagerank、内容丰富度、是否是spam等 Query-Doc的特征：文本相关性、query和doc共现的词在文档/查询中出现的次数等 此阶段就是要抽取出所有的特征，供后续训练使用。（一般是最耗时间和最影响模型结果的步骤） 4. 模型常用的排序学习分为三种类型：PointWise，PairWise和ListWise。 PointWise输入：单独的一篇文档 过程：文档-&gt;特征向量-&gt;模型得到回归/分类结果 输出：根据模型得到的文档的score；然后根据score排序。 优点:速度快，复杂度低. 缺点:效果一般没有考虑到文档之间的相对关系忽略了文档相关度与查询的关联，比如Top Query排在后面的相关性比Tial Query排在前面的都要高，导致训练样本不一致 PairWise对于搜索任务来说，系统接收到用户查询后，返回相关文档列表，所以问题的关键是确定文档之间的先后相对顺序关系，而Pairwise则将重点转向对文档关系是否合理的判断. 虽然Pairwise方法对Pointwise方法做了改进，但是也明显存在两个问题: 只考虑了两个文档的先后顺序，没有考虑文档出现在搜索列表中的位置 不同的查询，其相关文档数量差异很大，转换为文档对之后，有的查询可能有几百对文档，有的可能只有几十个，最终对机器学习的效果评价造成困难 ListWise与Pointwise和Pairwise不同，Listwise是将一个查询对应的所有搜索结果列表作为一个训练实例，因此也称为文档列方法. 5. 模型评估 MAP MAP(Mean Average Precision)表示文档在排序中的平均精度均值，是用于衡量个query查询见过的平均精度值AP,系统检索出来的相关文档越靠前(rank 越高)，MAP就可能越高。如果系统没有返回相关文档，则准确率默认为0。 NDCG NDCG表示表示归一化折损累积增益，主要是衡量实际相关性越高的文档排在越前面 5. 综述搜索引擎时敲定特征分的权重是非常疼的一件事儿，而LTR正好帮你定分，LTR的三种实现方法其实各有优劣： 难点主要在训练样本的构建(人工或者挖日志)，另外就是训练复杂 虽说Listwise效果最好，pointwise使用还是比较多，参考这篇文章综述LTR体验下 在工业界用的比较多的应该还是Pairwise，因为他构建训练样本相对方便，并且复杂度也还可以，所以Rank SVM就很火 结合ES和LTRhttps://github.com/o19s/elasticsearch-learning-to-rank 参考参考资料-1 参考资料-2]]></content>
+      <categories>
+        <category>Machine learning</category>
+      </categories>
+      <tags>
+        <tag>Machine Learning</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[2015年排名前10的Python开发库]]></title>
+    <url>%2F2015%2F12%2F18%2Ftop-10-python-libraries-of-2015%2F</url>
+    <content type="text"><![CDATA[来源：http://blog.tryolabs.com/2015/12/15/top-10-python-libraries-of-2015/作者：Alan翻译：Louis Xu 随着新的一年即将到来，我们常常坐下来思考到底2015年我们做了些什么。毋庸置疑，如果不是基于开源社区的伟大贡献，我们很多的项目不会像现在这样成功，更不会提供出如此多可靠的，经过实践检验的开发库。 似乎很多人都在写他们心目中排名前10的列表，当然我们也不能免俗。下面介绍的是我们在2015年使用过的10个最好的Python库，我们觉得有义务让大家都熟悉他们（以下排名不分先后）。我们也会避免介绍那些太过出名的库，诸如Django, Flask, Django Rest框架等，而是将重点放在那些不太为大家所熟知的开发库上。详情如下： jupyter试想一下，如果让一个画家在创作的时候不能立刻看到自己的画作，他的内心会如何抓狂。Jupyter Notebooks正是为了解决编写代码的时候遇到的类似问题。它使得代码，绘图和程序运行的结果可以更加直观地展现出来，而且它正越来越成为数据科学家们偏爱的工具库。所谓的Notebook就是代码和对应文档组合在一起的文档，基于这个特性，它是我们快速创建原型或者教程的得心应手的工具。尽管我们仅仅将jupyter用来编写Python代码，但是截至目前，它已经添加了针对其他编程语言诸如Julia和Haskell的支持。 retrying顾名思义，retrying库可以帮你避免一切不必要的重复劳动：它为你实现了重试的行为。它提供了一个通用的修饰器，这使得它能够毫不费力地赋予任何方法重试的能力，同时你可以对各种各样的属性进行配置以获得所需的重试行为。比如最多尝试次数，延迟，回退休眠，错误条件等等。它既轻量级又使用方便。 aiohttp截至2015年，最重要的开发库都被移植到了Python 3，所以我们也开始拥抱这种趋势。我们非常喜欢使用asyncio包通过协同程序(coroutines)来编写并发程序，所以我们有必要有一个使用相同并发模式的HTTP客户端（比如HTTP请求）和服务器端。aiohttp开发库正是这样一个为asyncio提供了易于使用的HTTP客户机/服务器的开发库。 Plumbum为了能够在Python程序里调用其他脚本或者可执行文件，我们已经尝试了多种将subprocess打包的方法，但是随着plumbum模式的出现，之前的方法都已无用武之地。通过一个易于使用的语法，你可以执行本地或者远程的命令，从而以跨平台的方式得到输出结果或者错误代码。如果这些还无法满足需求，你可以通过组合的方式（按照shell管道的方式）和一个界面来创建命令行应用程序。不妨一试！ Phonenumbers和电话号码打交道以及验证电话号码是一件真正痛苦的事情，因为这需要考虑国际冠码和区号，而且可能还有其他需要考虑的事情。该phonenumbers开发库是基于Google的libphonenumber移植而来并通过Python实现，值得庆幸的是该库大大简化了Google的libphonenumber库。它可以通过少量代码来用于解析，格式化和验证电话号码。更重要的是，phonenumbers可以区分一个电话号码是否是独一无二的(遵循E.164格式)。它同时适用于Python 2和Python 3。我们已经在很多项目中广泛使用了这个库，主要是通过它和django-phonenumber-field接口的结合来解决几乎一直弹出的繁琐问题。 Networkx图和网络通常用于许多不同的场景，例如组织数据或者展示数据流，抑或展示不同数据实体间的关系。利用Networkx可以创建并操作图和网络。Networkx使用的算法使其具有高可扩展性，该特性使得当处理复杂的图结构时它成为一个理想的选择。此外，大量的图渲染选项也使得它成为一款非常出色的可视化工具。 Influxdb如果你正在考虑将数据负载以时间序列为基础进行存储，那么InfluxDB是你需要考虑的工具。InfluxDB是一款时间序列数据库，一直以来，我们都在用它存储测量结果。只需要通过一个RESTful的API，我们可以轻易并有效地使用它。当谈论到大数据量的时候，这点尤为重要。此外，其内置的集群功能使得检索和数据分组都变得容易。这种官方的客户端通过调用API的方式抽象出了大部分的核心工作，尽管如此，我们还是希望看到它能够进一步改进成以Python化的方式来进行查询，而不是通过写原始的JSON来实现。 elasticsearch-dsl如果你曾经使用过Elasticsearch，那你在检查冗长的JSON格式的查询语句时一定备受煎熬，浪费了大把时间想要找出到底是什么地方的解析出现了错误。Elasticsearch DSL客户端是完全建立在官方的Elasticsearch客户端基础之上，同时让你不需要被JSON语句的问题所困扰：你只需要使用Python定义的类或者类查询集的表达式即可。它还提供包装能够让你将文档作为Python的对象，映射关系等来进行处理。 Keras深度学习是当前新的趋势，而这正是keras闪光的地方。它可以在Theano上运行，并可以通过各种神经网络的架构来进行快速实验。通过高度模块化和简约性，它可以在CPU和GPU上无缝运行。针对2015年度我们所解决的一些研发项目，类似keras这样的一个组成部分是至关紧要的。 Genism如果你对自然语言处理(NLP)感兴趣但是还没听说过Gensim，那你真是太与世隔绝了。它提供了一些最常用算法的快速，可扩展(独立内存)的实现，诸如tf-idf, word2vec, doc2vec, LSA等等，同时提供了一个易于使用且有据可查的接口。 最后的彩蛋: MonkeyLearn Python 最后我们不能不考虑MonkeyLearn开发库。它是Tryolabs出品的一款分支于自己公司的产品，它通过一个易于使用的RESTFul的API提供了云端的文本挖掘。通过它你可以得到诸如情绪观点，最重要的关键字的深入理解，还可以进行主题检测，以及其他一切你可以通过自定义的文本分类器可以做到的事情。MonkeyLearn Python是这个API的官方客户端，它同时支持Python 2和Python 3。]]></content>
+      <categories>
+        <category>Python</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+      </tags>
+  </entry>
+</search>

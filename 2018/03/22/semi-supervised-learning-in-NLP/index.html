@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="NLP,semi-supervised learning," />
 
 
 
@@ -79,17 +79,23 @@
 
 
 
-<meta name="description" content="距离上次更新博客已经两年多了">
-<meta property="og:type" content="website">
-<meta property="og:title" content="about">
-<meta property="og:url" content="http://yoursite.com/about/index.html">
+<meta name="description" content="Semi-supervised learning on NLP参考stanford nlp 2018 lecture 17。 Suggested Readings:  [Semi-Supervised Sequence Learning] [Learned in Translation: Contextualized Word Vectors] [Deep Contextualized Word">
+<meta name="keywords" content="NLP,semi-supervised learning">
+<meta property="og:type" content="article">
+<meta property="og:title" content="semi-supervised learning in NLP">
+<meta property="og:url" content="http://yoursite.com/2018/03/22/semi-supervised-learning-in-NLP/index.html">
 <meta property="og:site_name" content="随想空间">
-<meta property="og:description" content="距离上次更新博客已经两年多了">
+<meta property="og:description" content="Semi-supervised learning on NLP参考stanford nlp 2018 lecture 17。 Suggested Readings:  [Semi-Supervised Sequence Learning] [Learned in Translation: Contextualized Word Vectors] [Deep Contextualized Word">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-07-18T04:47:40.000Z">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/a0ca074cgy1ftiow9kkizj20lr0bxmz1.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/a0ca074cgy1ftipd1f38ej20mp0atabc.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/a0ca074cgy1ftir5slb5mj20dy0fl75h.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/a0ca074cgy1ftiri528utj20jw09sdgy.jpg">
+<meta property="og:updated_time" content="2018-09-28T15:57:48.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="about">
-<meta name="twitter:description" content="距离上次更新博客已经两年多了">
+<meta name="twitter:title" content="semi-supervised learning in NLP">
+<meta name="twitter:description" content="Semi-supervised learning on NLP参考stanford nlp 2018 lecture 17。 Suggested Readings:  [Semi-Supervised Sequence Learning] [Learned in Translation: Contextualized Word Vectors] [Deep Contextualized Word">
+<meta name="twitter:image" content="http://ww1.sinaimg.cn/large/a0ca074cgy1ftiow9kkizj20lr0bxmz1.jpg">
 
 
 
@@ -119,13 +125,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/about/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/03/22/semi-supervised-learning-in-NLP/"/>
 
 
 
 
 
-  <title>about | 随想空间</title>
+  <title>semi-supervised learning in NLP | 随想空间</title>
   
 
 
@@ -284,34 +290,210 @@
 
   <div id="posts" class="posts-expand">
     
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/22/semi-supervised-learning-in-NLP/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="小石头">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随想空间">
+    </span>
+
     
-    
-    <div class="post-block page">
       <header class="post-header">
 
-	<h1 class="post-title" itemprop="name headline">about</h1>
-
-
-
-</header>
-
-      
-      
-      
-      <div class="post-body">
         
         
-          <p>距离上次更新博客已经两年多了</p>
-
+          <h1 class="post-title" itemprop="name headline">semi-supervised learning in NLP</h1>
         
-      </div>
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-03-22T16:29:52+08:00">
+                2018-03-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Machine-learning/" itemprop="url" rel="index">
+                    <span itemprop="name">Machine learning</span>
+                  </a>
+                </span>
+
+                
+                
+                  , 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Machine-learning/NLP/" itemprop="url" rel="index">
+                    <span itemprop="name">NLP</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
       
       
+
+      
+        <h1 id="Semi-supervised-learning-on-NLP"><a href="#Semi-supervised-learning-on-NLP" class="headerlink" title="Semi-supervised learning on NLP"></a>Semi-supervised learning on NLP</h1><p>参考<a href="http://web.stanford.edu/class/cs224n/lectures/lecture17.pdf" target="_blank" rel="noopener">stanford nlp 2018 lecture 17</a>。</p>
+<p>Suggested Readings:</p>
+<ul>
+<li>[Semi-Supervised Sequence Learning]</li>
+<li>[Learned in Translation: Contextualized Word Vectors]</li>
+<li>[Deep Contextualized Word Representations]</li>
+<li>[Adversarial Training Methods for Semi-Supervised Text Classification]</li>
+</ul>
+<p>这里讲解三种主要的半监督学习技术：</p>
+<h2 id="1-Pre-training"><a href="#1-Pre-training" class="headerlink" title="1. Pre-training"></a>1. Pre-training</h2><a id="more"></a>
+<p>预训练分成两个主要阶段：</p>
+<ul>
+<li>首先在无标签样本上的无监督模型</li>
+<li>然后将无监督模型的权重迁移到监督模型，再在有标签数据上进行训练（这里有不同模型会在无监督模型的权重上进行fine-tune，有些不会）</li>
+</ul>
+<p>流程如下图所示：</p>
+<p><img src="http://ww1.sinaimg.cn/large/a0ca074cgy1ftiow9kkizj20lr0bxmz1.jpg" alt=""></p>
+<p>大家熟悉的典型例子是<strong>Word2Vec</strong>：</p>
+<ul>
+<li>shared part of the model: word embedding；</li>
+<li>没有unsupervised-only部分；</li>
+<li>supervised-only部分是除去word embedding 之外的模型；</li>
+</ul>
+<p>下面考虑一下，为何<strong>pre-training</strong>这种策略可以work呢？</p>
+<p>其实可以将这种预训练当做有监督学习模型的一种更加<strong>智能</strong>的初始化。换句话说，此时输入模型的不再是raw data，需要模型从中自主学习诸如词义、句义等相关表示，而是直接将这种表示直接作为输入塞入模型。</p>
+<p><img src="http://ww1.sinaimg.cn/large/a0ca074cgy1ftipd1f38ej20mp0atabc.jpg" alt=""></p>
+<p>具体应用到NLP中，“预训练”这种策略是如何生效的呢？一般来说，大多数基于神经网络的NLP应用框架如下所示：</p>
+<p><img src="http://ww1.sinaimg.cn/large/a0ca074cgy1ftir5slb5mj20dy0fl75h.jpg" alt=""></p>
+<p>这里<code>Embedding loookup</code>层一般对应于这里的预训练层，当然，目前也有一些其他模型会区分<code>pre-trained encoder</code>和<code>supervised encoder</code>。</p>
+<p>下面介绍三种pre-training的策略：</p>
+<h3 id="1-Auto-encoder"><a href="#1-Auto-encoder" class="headerlink" title="1) Auto-encoder"></a>1) Auto-encoder</h3><p>这里应用自编码机的最主要目的是为了获取输入数据中最核心的信息，而<strong>“核心信息”</strong>的定义这里是基于一个假设：可以被无损重构的信息。在训练完成Auto-encoder之后，去除decoder部分，直接把encoder的结果作为后续神经网络的输入即可。框架如下：</p>
+<p><img src="http://ww1.sinaimg.cn/large/a0ca074cgy1ftiri528utj20jw09sdgy.jpg" alt=""></p>
+<h3 id="2-CoVe"><a href="#2-CoVe" class="headerlink" title="2) CoVe"></a>2) CoVe</h3><h3 id="3-ELMo"><a href="#3-ELMo" class="headerlink" title="3) ELMo"></a>3) ELMo</h3><h2 id="2-Self-training"><a href="#2-Self-training" class="headerlink" title="2. Self-training"></a>2. Self-training</h2><h2 id="3-Consistency-regularization"><a href="#3-Consistency-regularization" class="headerlink" title="3. Consistency regularization"></a>3. Consistency regularization</h2>
       
     </div>
     
     
     
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/NLP/" rel="tag"># NLP</a>
+          
+            <a href="/tags/semi-supervised-learning/" rel="tag"># semi-supervised learning</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/08/06/understanding-Learning-to-Rank/" rel="next" title="理解Learning to Rank算法">
+                <i class="fa fa-chevron-left"></i> 理解Learning to Rank算法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
   </div>
 
 
@@ -344,8 +526,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -421,6 +612,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Semi-supervised-learning-on-NLP"><span class="nav-number">1.</span> <span class="nav-text">Semi-supervised learning on NLP</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Pre-training"><span class="nav-number">1.1.</span> <span class="nav-text">1. Pre-training</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Auto-encoder"><span class="nav-number">1.1.1.</span> <span class="nav-text">1) Auto-encoder</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-CoVe"><span class="nav-number">1.1.2.</span> <span class="nav-text">2) CoVe</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-ELMo"><span class="nav-number">1.1.3.</span> <span class="nav-text">3) ELMo</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Self-training"><span class="nav-number">1.2.</span> <span class="nav-text">2. Self-training</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Consistency-regularization"><span class="nav-number">1.3.</span> <span class="nav-text">3. Consistency regularization</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       

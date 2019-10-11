@@ -1,400 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
-<search>
-  <entry>
-    <title>BERT</title>
-    <url>/2018/10/26/BERT/</url>
-    <content><![CDATA[<h1 id="解决的问题"><a href="#解决的问题" class="headerlink" title="解决的问题"></a>解决的问题</h1><p>对应NLP的任务来说，比如QA、MRC、chatbot等，简单预训练，加上复杂的针对任务的下游网络是否合理？<br><a id="more"></a></p>
-<h1 id="why"><a href="#why" class="headerlink" title="why"></a>why</h1><p>一般针对已经存在的pre-training模型，针对不同的应用有两种策略来应用这种模型：<em>feature based</em>和<em>fine-tuning</em>。两种策略的典型方向对应于：</p>
-<ol>
-<li>feature based: ELMo</li>
-<li>fine-tuning: OpenAI Generative Pre-trained Transformer(GPT)</li>
-</ol>
-<p>具体说，ELMo使用预训练的表征作为特定任务的额外特征。而GPT尽可能少地引入任务相关的参数，相反地在具体任务中进行微调。这两种策略在预训练过程中使用相同的目标函数，也就是<strong>单向的语言模型</strong>来进行学习通用语言的表征。</p>
-<h2 id="feature-based"><a href="#feature-based" class="headerlink" title="feature based"></a>feature based</h2><p><a href="https://allennlp.org/elmo" target="_blank" rel="noopener">ELMo: Deep contextualized word representations</a></p>
-<h3 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h3><ul>
-<li>解决的问题：<ul>
-<li>表征单词的复杂特性：语法和语义</li>
-<li>模型的多用型（polysemy）</li>
-</ul>
-</li>
-<li>核心<ul>
-<li>deep</li>
-<li>function of all internal layers of biLM (bidirectional Language Model)<blockquote>
-<p>each token is assigned a representation that is a function of the entire input sentence.</p>
-</blockquote>
-</li>
-</ul>
-</li>
-<li>发现：<ul>
-<li>high-level的LSTM state：语义</li>
-<li>low-level：语法</li>
-</ul>
-</li>
-<li>实验：<ul>
-<li>textual entailment</li>
-<li>QA</li>
-<li>sentiment analysis</li>
-</ul>
-</li>
-<li>比对模型：CoVe (Contextualized word vectors, NIPS-2017)</li>
-<li>方向：semi-supervised</li>
-</ul>
-<h3 id="框架"><a href="#框架" class="headerlink" title="框架"></a>框架</h3><ul>
-<li>双向语言模型<ul>
-<li>$\sum_{k=1}^{N}(log p(t_k|t_1,…,t_{k-1};\Theta_x,\overrightarrow{\Theta}_{LSTM}, \Theta_s) + log p(t_k|t_{k+1},…,t_{N};\Theta_x,\overleftarrow{\Theta}_{LSTM}, \Theta_s))$</li>
-<li>两个方向上的一些参数会共享</li>
-</ul>
-</li>
-<li>核心：<ul>
-<li>对于每一个token $t_k$，L层的biLM计算得到如下的表示：<ul>
-<li>$R_k = {x_k^{LM},\overrightarrow{h}_{k,j}^{LM},\overleftarrow{h}^{LM}|j=1,…,L}$</li>
-</ul>
-</li>
-<li><strong>function</strong>: <ul>
-<li>$ELMo_k^{task} = E(R_k;\Theta^{task})=\gamma^{task}\sum_{j=0}^Ls_j^{task}h_{k,j}^{LM}$，其中$s^{task}$为归一化的不同层softmax权重</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="fine-tuning-based"><a href="#fine-tuning-based" class="headerlink" title="fine tuning based"></a>fine tuning based</h2><p><a href="https://blog.openai.com/language-unsupervised/" target="_blank" rel="noopener">Improving Language Understanding with Unsupervised Learning</a></p>
-<h3 id="概览-1"><a href="#概览-1" class="headerlink" title="概览"></a>概览</h3><ul>
-<li>方向：semi-supervised</li>
-<li>解决的问题：利用大量无标签的数据，进行预训练，再在不同的带有标签的语言任务上进行fine-tune。</li>
-<li>主要结构：Transformer</li>
-<li>实验：四种NLU的任务：<ul>
-<li>natural language inference</li>
-<li>QA</li>
-<li>semantic similarity</li>
-<li>text classification</li>
-</ul>
-</li>
-<li>对之前工作的吐槽：<ul>
-<li>比如Word2vec虽然是基于无标签数据预训练得到，而且也得到了最广泛的应用，但是目前大多数是针对word-level的information transfer，这篇文章的作者目标是捕获更高层次的语义表征</li>
-<li>传统的手段是通过phrase-level和sentence-level来实现</li>
-<li>吐槽之前unsupervised用的LSTM，现在用的transformer，可以获取更长范围内的语言结构</li>
-<li>之前有些工作会利用额外的无监督训练目标函数，作者吐槽虽然他们也用了，但是在无监督预训练中已经可以学到目标任务的相关信息了…</li>
-</ul>
-</li>
-</ul>
-<h3 id="框架-1"><a href="#框架-1" class="headerlink" title="框架"></a>框架</h3><p>主要分为两个部分：</p>
-<ol>
-<li>无监督的预训练 (unsupervised pre-training)</li>
-<li>有监督的微调 (supervised fine-tuning)</li>
-</ol>
-<h4 id="无监督预训练"><a href="#无监督预训练" class="headerlink" title="无监督预训练"></a>无监督预训练</h4><ul>
-<li>给定token：$U = {u_1,…,u_n}$</li>
-<li>目标函数：$max L_1(U) = \sum_i logP(u_i|u_{i-k},…,u_{i-1};\Theta)$，其中$k$为context window</li>
-<li>使用了多层Transformer decoder</li>
-</ul>
-<h4 id="有监督微调"><a href="#有监督微调" class="headerlink" title="有监督微调"></a>有监督微调</h4><p>对于具体任务而言：</p>
-<ul>
-<li>输入：$x^1, x^2,…,x^m$</li>
-<li>标签：$y$</li>
-<li>预训练模块：$M$，假设输入经过该模块的输出为最后一个transformer的$h_l^m$</li>
-<li>模型输出：$P(y|x^1…x^m) = softmax(h_l^mW_y)$</li>
-<li>目标函数：$max L_2(C) = \sum_{(x,y)}log P(y|x^1…x^m)$</li>
-<li>加入无监督训练的目标函数一起优化：$L_3(C) = L_2(C) + \lambda * L_1(C)$</li>
-</ul>
-<h4 id="不同任务的修正"><a href="#不同任务的修正" class="headerlink" title="不同任务的修正"></a>不同任务的修正</h4><p><img src="http://ww1.sinaimg.cn/large/a0ca074cly1fwkjmili1jj20ou0cf0xb.jpg" alt=""></p>
-<h1 id="what"><a href="#what" class="headerlink" title="what"></a>what</h1><p>上述的模型依然无法解决需要为每个特定任务定制各种各种花式的网络结构。BERT的目的便在于此。</p>
-<h2 id="BERT"><a href="#BERT" class="headerlink" title="BERT"></a>BERT</h2><h3 id="Warm-up"><a href="#Warm-up" class="headerlink" title="Warm-up"></a>Warm-up</h3><ol>
-<li>ELMo: extract <strong>context sensitive</strong>features from language model</li>
-<li>Transfer Learning from unsupervised data: OpenAI GPT. Pre-train on LM objective, fine-tune on supervised downstream tasks.</li>
-<li>Transfer Learning from supervised data: Need more labeled data.</li>
-</ol>
-<h3 id="Architecture"><a href="#Architecture" class="headerlink" title="Architecture"></a>Architecture</h3><ul>
-<li>multi-layer</li>
-<li>bi-directional</li>
-<li>Transformer</li>
-</ul>
-<p>总体来说，BERT可以认为是双向transformer结构的LM+fine-tuning结构:<br><img src="http://ww1.sinaimg.cn/large/a0ca074cly1fwovdhk2w6j20pq09swhl.jpg" alt=""></p>
-<h3 id="输入"><a href="#输入" class="headerlink" title="输入"></a>输入</h3><ul>
-<li>目的：同时表征<strong>单个文本句子</strong>和<strong>文本句子对</strong>，比如QA中的Q和A</li>
-</ul>
-<p><img src="http://ww1.sinaimg.cn/large/a0ca074cly1fwow6rl9gvj20q1094q4n.jpg" alt=""></p>
-<ol>
-<li>token embeddings：<ul>
-<li>wordpiece embeddings</li>
-<li>CLS for classification problem</li>
-</ul>
-</li>
-<li>segment embeddings:<ul>
-<li>[sep]区分句子</li>
-<li>添加当前词所在句子的index embedding</li>
-<li>单个句子，只使用第一个sentence embedding</li>
-</ul>
-</li>
-<li>position embeddings:<ul>
-<li>当前词偶在位置的index embedding</li>
-</ul>
-</li>
-</ol>
-<p>最后输入为三个embedding的简单相加。。。简单粗暴</p>
-<h3 id="核心：预训练模型"><a href="#核心：预训练模型" class="headerlink" title="核心：预训练模型"></a>核心：预训练模型</h3><ul>
-<li>无监督</li>
-<li>真正意义上的双向</li>
-<li>分解为两个任务</li>
-</ul>
-<h4 id="Task-1-Masked-LM"><a href="#Task-1-Masked-LM" class="headerlink" title="Task 1: Masked LM"></a>Task 1: Masked LM</h4><ul>
-<li>首先想一下目前的双向模型是否是真正的双向？</li>
-<li>为何目前的双向模型无法真正双向？</li>
-</ul>
-<p>解决方案：【Masked Language Model】随机（这里采用15%）覆盖某些token，然后预测这些覆盖的token，而不是像传统LM那样预测下一个词的分布。</p>
-<ul>
-<li><p>有没有问题？？？</p>
-<ol>
-<li>mismatch between pre-training and fine-tuning，换句话说，[MASK]在fine-tuning的时候未知。</li>
-<li>训练过程中每个batch只有15%的数据用于预测，预训练模型收敛会变慢。</li>
-</ol>
-</li>
-<li><p>解决方案：</p>
-<ol>
-<li>针对15%的token，dataloader分成三个部分：<ol>
-<li>80%情况用[mask]覆盖：<code>my dog is hairy</code> -&gt; <code>my dog is [MASK]</code></li>
-<li>10%情况用随机单词覆盖：<code>my dog is hairy</code> -&gt; <code>my dog is apple</code></li>
-<li>10%情况不变：<code>my dog is hairy</code> -&gt; <code>my dog is hairy</code></li>
-</ol>
-</li>
-</ol>
-</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># get random data in dataloader</span></span><br><span class="line"><span class="keyword">for</span> i, token <span class="keyword">in</span> enumerate(tokens):</span><br><span class="line">    prob = random.random()</span><br><span class="line">    <span class="keyword">if</span> prob &lt; <span class="number">0.15</span>:</span><br><span class="line">        prob /= <span class="number">0.15</span></span><br><span class="line">        <span class="comment"># 80% randomly change token to mask token</span></span><br><span class="line">        <span class="keyword">if</span> prob &lt; <span class="number">0.8</span>:</span><br><span class="line">            tokens[i] = self.vocab.mask_index</span><br><span class="line">        <span class="comment"># 10% randomly change token to random token</span></span><br><span class="line">        <span class="keyword">elif</span> prob &lt; <span class="number">0.9</span>:</span><br><span class="line">            tokens[i] = random.randrange(len(self.vocab))</span><br><span class="line">        <span class="comment"># 10% randomly change token to current token</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            tokens[i] = self.vocab.stoi.get(token, self.vocab.unk_index)</span><br><span class="line">        output_label.append(self.vocab.stoi.get(token, self.vocab.unk_index))</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        tokens[i] = self.vocab.stoi.get(token, self.vocab.unk_index)</span><br><span class="line">        output_label.append(<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
-<h4 id="Task-2-Next-sentence-predition"><a href="#Task-2-Next-sentence-predition" class="headerlink" title="Task 2: Next sentence predition"></a>Task 2: Next sentence predition</h4><ul>
-<li>目的：语言模型无法建模句子和句子之间的关系，该task就是为了解决这个问题。</li>
-<li>语料构建：<ul>
-<li>50%几率替换句子A的下一句话B</li>
-<li>二分类标签：<code>isNext</code>和<code>NotNext</code><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">random_sent</span><span class="params">(self, index)</span>:</span></span><br><span class="line">    t1, t2 = self.get_corpus_line(index)</span><br><span class="line">    <span class="comment"># output_text, label(isNotNext:0, isNext:1)</span></span><br><span class="line">    <span class="keyword">if</span> random.random() &gt; <span class="number">0.5</span>:</span><br><span class="line">        <span class="keyword">return</span> t1, t2, <span class="number">1</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> t1, self.get_random_line(), <span class="number">0</span></span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h3><h4 id="语料"><a href="#语料" class="headerlink" title="语料"></a>语料</h4><ul>
-<li>BookCorpus(800M words）</li>
-<li>English Wikipedia(2,500M words)：注意这里尽量使用具有长文本的语料，以此表征长的连续文本关系。</li>
-</ul>
-<h4 id="训练"><a href="#训练" class="headerlink" title="训练"></a>训练</h4><ul>
-<li>超参数：<ul>
-<li>batch size：256</li>
-<li>lr：1e-4, learning rate warm-up </li>
-<li>Adam</li>
-<li>L2 decay: 0.01</li>
-<li>dropout: 0.1</li>
-<li>activation： gelu</li>
-</ul>
-</li>
-<li>损失函数：<ul>
-<li>$loss(task1) + loss(task2)$</li>
-</ul>
-</li>
-</ul>
-<h4 id="计算量"><a href="#计算量" class="headerlink" title="计算量"></a>计算量</h4><blockquote>
-<p>BERT-Base: L = 12, H = 768, A = 12, Total parameters = 110M<br>BERT-Large: L = 24, H = 1024, A = 16, Total parameters = 340M<br>其中L表示Transformer层数，H表示Transformer内部维度，A表示Heads的数量</p>
-</blockquote>
-<ul>
-<li>Base model: 16TPU, 4days</li>
-<li>large model: 64TPU, 4days</li>
-<li>4 standard GPUs: 99days</li>
-</ul>
-<h4 id="如何泛化到不同任务"><a href="#如何泛化到不同任务" class="headerlink" title="如何泛化到不同任务"></a>如何泛化到不同任务</h4><p>这里比较了11种不同的NLP任务，具体参考论文。</p>
-<p><img src="http://ww1.sinaimg.cn/large/a0ca074cly1fwp190t28dj20lq0ky79c.jpg" alt=""></p>
-<h4 id="结果分析"><a href="#结果分析" class="headerlink" title="结果分析"></a>结果分析</h4><ol>
-<li>pre-train model的影响</li>
-</ol>
-<p><img src="https://pic2.zhimg.com/v2-b9d232ca7875ca6db8e739a34fa0ee74_b.jpg" alt=""></p>
-<ol start="2">
-<li>training steps的影响</li>
-</ol>
-<p><img src="https://pic1.zhimg.com/v2-70035953238890d3dce14b7e57966a03_b.jpg" alt=""></p>
-<ol start="3">
-<li>BERT+feature-based</li>
-</ol>
-<p><img src="https://pic1.zhimg.com/v2-596cd8e36594741f803ef5fc623cdcf8_b.jpg" alt=""></p>
-<h1 id="how"><a href="#how" class="headerlink" title="how"></a>how</h1><p>目前非官方的<a href="https://github.com/codertimo/BERT-pytorch" target="_blank" rel="noopener">pytorch实现</a>。</p>
-<h2 id="核心模型代码"><a href="#核心模型代码" class="headerlink" title="核心模型代码"></a>核心模型代码</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># model overview</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BERT</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    BERT model : Bidirectional Encoder Representations from Transformers.</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, vocab_size, hidden=<span class="number">768</span>, n_layers=<span class="number">12</span>, attn_heads=<span class="number">12</span>, dropout=<span class="number">0.1</span>)</span>:</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        :param vocab_size: vocab_size of total words</span></span><br><span class="line"><span class="string">        :param hidden: BERT model hidden size</span></span><br><span class="line"><span class="string">        :param n_layers: numbers of Transformer blocks(layers)</span></span><br><span class="line"><span class="string">        :param attn_heads: number of attention heads</span></span><br><span class="line"><span class="string">        :param dropout: dropout rate</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        super().__init__()</span><br><span class="line">        self.hidden = hidden</span><br><span class="line">        self.n_layers = n_layers</span><br><span class="line">        self.attn_heads = attn_heads</span><br><span class="line">        <span class="comment"># paper noted they used 4*hidden_size for ff_network_hidden_size</span></span><br><span class="line">        self.feed_forward_hidden = hidden * <span class="number">4</span></span><br><span class="line">        <span class="comment"># embedding for BERT, sum of positional, segment, token embeddings</span></span><br><span class="line">        self.embedding = BERTEmbedding(vocab_size=vocab_size, embed_size=hidden)</span><br><span class="line">        <span class="comment"># multi-layers transformer blocks, deep network</span></span><br><span class="line">        self.transformer_blocks = nn.ModuleList(</span><br><span class="line">            [TransformerBlock(hidden, attn_heads, hidden * <span class="number">4</span>, dropout) <span class="keyword">for</span> _ <span class="keyword">in</span> range(n_layers)])</span><br><span class="line">            </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, x, segment_info)</span>:</span></span><br><span class="line">        <span class="comment"># attention masking for padded token</span></span><br><span class="line">        <span class="comment"># torch.ByteTensor([batch_size, 1, seq_len, seq_len)</span></span><br><span class="line">        mask = (x &gt; <span class="number">0</span>).unsqueeze(<span class="number">1</span>).repeat(<span class="number">1</span>, x.size(<span class="number">1</span>), <span class="number">1</span>).unsqueeze(<span class="number">1</span>)</span><br><span class="line">        <span class="comment"># embedding the indexed sequence to sequence of vectors</span></span><br><span class="line">        x = self.embedding(x, segment_info)</span><br><span class="line">        <span class="comment"># running over multiple transformer blocks</span></span><br><span class="line">        <span class="keyword">for</span> transformer <span class="keyword">in</span> self.transformer_blocks:</span><br><span class="line">            x = transformer.forward(x, mask)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> x</span><br></pre></td></tr></table></figure>
-<h1 id="目前对我们的用处"><a href="#目前对我们的用处" class="headerlink" title="目前对我们的用处"></a>目前对我们的用处</h1><ol>
-<li>character-level word vectors: fasttext in chinese?</li>
-<li>semantic analysis</li>
-<li>entity recognition</li>
-<li>relation extraction: Non-related corpus construction.</li>
-<li>Chinese corpus? wait for model and fine-tune it…</li>
-<li>对于生成模型是否有帮助（诸如NMT，image captioning）？</li>
-<li>对于生成模型的benchmark是否有帮助？比如可以根据BERT的结果计算一个metric，然后针对不同任务都有类似的评价指标？</li>
-<li>该网络是否可以更加简化？</li>
-<li>和强化学习有和关联或者应用？</li>
-</ol>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
-<li><a href="https://github.com/allenai/allennlp/blob/master/tutorials/how_to/elmo.md" target="_blank" rel="noopener">ELMo: Deep contextualized word representations</a></li>
-<li><a href="https://blog.openai.com/language-unsupervised/" target="_blank" rel="noopener">Improving Language Understanding with Unsupervised Learning</a></li>
-<li><a href="https://www.reddit.com/r/MachineLearning/comments/9nfqxz/r_bert_pretraining_of_deep_bidirectional/" target="_blank" rel="noopener">BERT reddit discussion</a></li>
-</ol>
-]]></content>
+<search> 
+  
+    
+    <entry>
+      <title>BERT</title>
+      <link href="/2018/10/26/BERT/"/>
+      <url>/2018/10/26/BERT/</url>
+      
+        <content type="html"><![CDATA[<h1 id="解决的问题"><a href="#解决的问题" class="headerlink" title="解决的问题"></a>解决的问题</h1><p>对应NLP的任务来说，比如QA、MRC、chatbot等，简单预训练，加上复杂的针对任务的下游网络是否合理？<br><a id="more"></a></p><h1 id="why"><a href="#why" class="headerlink" title="why"></a>why</h1><p>一般针对已经存在的pre-training模型，针对不同的应用有两种策略来应用这种模型：<em>feature based</em>和<em>fine-tuning</em>。两种策略的典型方向对应于：</p><ol><li>feature based: ELMo</li><li>fine-tuning: OpenAI Generative Pre-trained Transformer(GPT)</li></ol><p>具体说，ELMo使用预训练的表征作为特定任务的额外特征。而GPT尽可能少地引入任务相关的参数，相反地在具体任务中进行微调。这两种策略在预训练过程中使用相同的目标函数，也就是<strong>单向的语言模型</strong>来进行学习通用语言的表征。</p><h2 id="feature-based"><a href="#feature-based" class="headerlink" title="feature based"></a>feature based</h2><p><a href="https://allennlp.org/elmo" target="_blank" rel="noopener">ELMo: Deep contextualized word representations</a></p><h3 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h3><ul><li>解决的问题：<ul><li>表征单词的复杂特性：语法和语义</li><li>模型的多用型（polysemy）</li></ul></li><li>核心<ul><li>deep</li><li>function of all internal layers of biLM (bidirectional Language Model)<blockquote><p>each token is assigned a representation that is a function of the entire input sentence.</p></blockquote></li></ul></li><li>发现：<ul><li>high-level的LSTM state：语义</li><li>low-level：语法</li></ul></li><li>实验：<ul><li>textual entailment</li><li>QA</li><li>sentiment analysis</li></ul></li><li>比对模型：CoVe (Contextualized word vectors, NIPS-2017)</li><li>方向：semi-supervised</li></ul><h3 id="框架"><a href="#框架" class="headerlink" title="框架"></a>框架</h3><ul><li>双向语言模型<ul><li>$\sum_{k=1}^{N}(log p(t_k|t_1,…,t_{k-1};\Theta_x,\overrightarrow{\Theta}_{LSTM}, \Theta_s) + log p(t_k|t_{k+1},…,t_{N};\Theta_x,\overleftarrow{\Theta}_{LSTM}, \Theta_s))$</li><li>两个方向上的一些参数会共享</li></ul></li><li>核心：<ul><li>对于每一个token $t_k$，L层的biLM计算得到如下的表示：<ul><li>$R_k = {x_k^{LM},\overrightarrow{h}_{k,j}^{LM},\overleftarrow{h}^{LM}|j=1,…,L}$</li></ul></li><li><strong>function</strong>: <ul><li>$ELMo_k^{task} = E(R_k;\Theta^{task})=\gamma^{task}\sum_{j=0}^Ls_j^{task}h_{k,j}^{LM}$，其中$s^{task}$为归一化的不同层softmax权重</li></ul></li></ul></li></ul><h2 id="fine-tuning-based"><a href="#fine-tuning-based" class="headerlink" title="fine tuning based"></a>fine tuning based</h2><p><a href="https://blog.openai.com/language-unsupervised/" target="_blank" rel="noopener">Improving Language Understanding with Unsupervised Learning</a></p><h3 id="概览-1"><a href="#概览-1" class="headerlink" title="概览"></a>概览</h3><ul><li>方向：semi-supervised</li><li>解决的问题：利用大量无标签的数据，进行预训练，再在不同的带有标签的语言任务上进行fine-tune。</li><li>主要结构：Transformer</li><li>实验：四种NLU的任务：<ul><li>natural language inference</li><li>QA</li><li>semantic similarity</li><li>text classification</li></ul></li><li>对之前工作的吐槽：<ul><li>比如Word2vec虽然是基于无标签数据预训练得到，而且也得到了最广泛的应用，但是目前大多数是针对word-level的information transfer，这篇文章的作者目标是捕获更高层次的语义表征</li><li>传统的手段是通过phrase-level和sentence-level来实现</li><li>吐槽之前unsupervised用的LSTM，现在用的transformer，可以获取更长范围内的语言结构</li><li>之前有些工作会利用额外的无监督训练目标函数，作者吐槽虽然他们也用了，但是在无监督预训练中已经可以学到目标任务的相关信息了…</li></ul></li></ul><h3 id="框架-1"><a href="#框架-1" class="headerlink" title="框架"></a>框架</h3><p>主要分为两个部分：</p><ol><li>无监督的预训练 (unsupervised pre-training)</li><li>有监督的微调 (supervised fine-tuning)</li></ol><h4 id="无监督预训练"><a href="#无监督预训练" class="headerlink" title="无监督预训练"></a>无监督预训练</h4><ul><li>给定token：$U = {u_1,…,u_n}$</li><li>目标函数：$max L_1(U) = \sum_i logP(u_i|u_{i-k},…,u_{i-1};\Theta)$，其中$k$为context window</li><li>使用了多层Transformer decoder</li></ul><h4 id="有监督微调"><a href="#有监督微调" class="headerlink" title="有监督微调"></a>有监督微调</h4><p>对于具体任务而言：</p><ul><li>输入：$x^1, x^2,…,x^m$</li><li>标签：$y$</li><li>预训练模块：$M$，假设输入经过该模块的输出为最后一个transformer的$h_l^m$</li><li>模型输出：$P(y|x^1…x^m) = softmax(h_l^mW_y)$</li><li>目标函数：$max L_2(C) = \sum_{(x,y)}log P(y|x^1…x^m)$</li><li>加入无监督训练的目标函数一起优化：$L_3(C) = L_2(C) + \lambda * L_1(C)$</li></ul><h4 id="不同任务的修正"><a href="#不同任务的修正" class="headerlink" title="不同任务的修正"></a>不同任务的修正</h4><p><img src="http://ww1.sinaimg.cn/large/a0ca074cly1fwkjmili1jj20ou0cf0xb.jpg" alt=""></p><h1 id="what"><a href="#what" class="headerlink" title="what"></a>what</h1><p>上述的模型依然无法解决需要为每个特定任务定制各种各种花式的网络结构。BERT的目的便在于此。</p><h2 id="BERT"><a href="#BERT" class="headerlink" title="BERT"></a>BERT</h2><h3 id="Warm-up"><a href="#Warm-up" class="headerlink" title="Warm-up"></a>Warm-up</h3><ol><li>ELMo: extract <strong>context sensitive</strong>features from language model</li><li>Transfer Learning from unsupervised data: OpenAI GPT. Pre-train on LM objective, fine-tune on supervised downstream tasks.</li><li>Transfer Learning from supervised data: Need more labeled data.</li></ol><h3 id="Architecture"><a href="#Architecture" class="headerlink" title="Architecture"></a>Architecture</h3><ul><li>multi-layer</li><li>bi-directional</li><li>Transformer</li></ul><p>总体来说，BERT可以认为是双向transformer结构的LM+fine-tuning结构:<br><img src="http://ww1.sinaimg.cn/large/a0ca074cly1fwovdhk2w6j20pq09swhl.jpg" alt=""></p><h3 id="输入"><a href="#输入" class="headerlink" title="输入"></a>输入</h3><ul><li>目的：同时表征<strong>单个文本句子</strong>和<strong>文本句子对</strong>，比如QA中的Q和A</li></ul><p><img src="http://ww1.sinaimg.cn/large/a0ca074cly1fwow6rl9gvj20q1094q4n.jpg" alt=""></p><ol><li>token embeddings：<ul><li>wordpiece embeddings</li><li>CLS for classification problem</li></ul></li><li>segment embeddings:<ul><li>[sep]区分句子</li><li>添加当前词所在句子的index embedding</li><li>单个句子，只使用第一个sentence embedding</li></ul></li><li>position embeddings:<ul><li>当前词偶在位置的index embedding</li></ul></li></ol><p>最后输入为三个embedding的简单相加。。。简单粗暴</p><h3 id="核心：预训练模型"><a href="#核心：预训练模型" class="headerlink" title="核心：预训练模型"></a>核心：预训练模型</h3><ul><li>无监督</li><li>真正意义上的双向</li><li>分解为两个任务</li></ul><h4 id="Task-1-Masked-LM"><a href="#Task-1-Masked-LM" class="headerlink" title="Task 1: Masked LM"></a>Task 1: Masked LM</h4><ul><li>首先想一下目前的双向模型是否是真正的双向？</li><li>为何目前的双向模型无法真正双向？</li></ul><p>解决方案：【Masked Language Model】随机（这里采用15%）覆盖某些token，然后预测这些覆盖的token，而不是像传统LM那样预测下一个词的分布。</p><ul><li><p>有没有问题？？？</p><ol><li>mismatch between pre-training and fine-tuning，换句话说，[MASK]在fine-tuning的时候未知。</li><li>训练过程中每个batch只有15%的数据用于预测，预训练模型收敛会变慢。</li></ol></li><li><p>解决方案：</p><ol><li>针对15%的token，dataloader分成三个部分：<ol><li>80%情况用[mask]覆盖：<code>my dog is hairy</code> -&gt; <code>my dog is [MASK]</code></li><li>10%情况用随机单词覆盖：<code>my dog is hairy</code> -&gt; <code>my dog is apple</code></li><li>10%情况不变：<code>my dog is hairy</code> -&gt; <code>my dog is hairy</code></li></ol></li></ol></li></ul><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># get random data in dataloader</span></span><br><span class="line"><span class="keyword">for</span> i, token <span class="keyword">in</span> enumerate(tokens):</span><br><span class="line">    prob = random.random()</span><br><span class="line">    <span class="keyword">if</span> prob &lt; <span class="number">0.15</span>:</span><br><span class="line">        prob /= <span class="number">0.15</span></span><br><span class="line">        <span class="comment"># 80% randomly change token to mask token</span></span><br><span class="line">        <span class="keyword">if</span> prob &lt; <span class="number">0.8</span>:</span><br><span class="line">            tokens[i] = self.vocab.mask_index</span><br><span class="line">        <span class="comment"># 10% randomly change token to random token</span></span><br><span class="line">        <span class="keyword">elif</span> prob &lt; <span class="number">0.9</span>:</span><br><span class="line">            tokens[i] = random.randrange(len(self.vocab))</span><br><span class="line">        <span class="comment"># 10% randomly change token to current token</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            tokens[i] = self.vocab.stoi.get(token, self.vocab.unk_index)</span><br><span class="line">        output_label.append(self.vocab.stoi.get(token, self.vocab.unk_index))</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        tokens[i] = self.vocab.stoi.get(token, self.vocab.unk_index)</span><br><span class="line">        output_label.append(<span class="number">0</span>)</span><br></pre></td></tr></table></figure><h4 id="Task-2-Next-sentence-predition"><a href="#Task-2-Next-sentence-predition" class="headerlink" title="Task 2: Next sentence predition"></a>Task 2: Next sentence predition</h4><ul><li>目的：语言模型无法建模句子和句子之间的关系，该task就是为了解决这个问题。</li><li>语料构建：<ul><li>50%几率替换句子A的下一句话B</li><li>二分类标签：<code>isNext</code>和<code>NotNext</code><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">random_sent</span><span class="params">(self, index)</span>:</span></span><br><span class="line">    t1, t2 = self.get_corpus_line(index)</span><br><span class="line">    <span class="comment"># output_text, label(isNotNext:0, isNext:1)</span></span><br><span class="line">    <span class="keyword">if</span> random.random() &gt; <span class="number">0.5</span>:</span><br><span class="line">        <span class="keyword">return</span> t1, t2, <span class="number">1</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> t1, self.get_random_line(), <span class="number">0</span></span><br></pre></td></tr></table></figure></li></ul></li></ul><h3 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h3><h4 id="语料"><a href="#语料" class="headerlink" title="语料"></a>语料</h4><ul><li>BookCorpus(800M words）</li><li>English Wikipedia(2,500M words)：注意这里尽量使用具有长文本的语料，以此表征长的连续文本关系。</li></ul><h4 id="训练"><a href="#训练" class="headerlink" title="训练"></a>训练</h4><ul><li>超参数：<ul><li>batch size：256</li><li>lr：1e-4, learning rate warm-up </li><li>Adam</li><li>L2 decay: 0.01</li><li>dropout: 0.1</li><li>activation： gelu</li></ul></li><li>损失函数：<ul><li>$loss(task1) + loss(task2)$</li></ul></li></ul><h4 id="计算量"><a href="#计算量" class="headerlink" title="计算量"></a>计算量</h4><blockquote><p>BERT-Base: L = 12, H = 768, A = 12, Total parameters = 110M<br>BERT-Large: L = 24, H = 1024, A = 16, Total parameters = 340M<br>其中L表示Transformer层数，H表示Transformer内部维度，A表示Heads的数量</p></blockquote><ul><li>Base model: 16TPU, 4days</li><li>large model: 64TPU, 4days</li><li>4 standard GPUs: 99days</li></ul><h4 id="如何泛化到不同任务"><a href="#如何泛化到不同任务" class="headerlink" title="如何泛化到不同任务"></a>如何泛化到不同任务</h4><p>这里比较了11种不同的NLP任务，具体参考论文。</p><p><img src="http://ww1.sinaimg.cn/large/a0ca074cly1fwp190t28dj20lq0ky79c.jpg" alt=""></p><h4 id="结果分析"><a href="#结果分析" class="headerlink" title="结果分析"></a>结果分析</h4><ol><li>pre-train model的影响</li></ol><p><img src="https://pic2.zhimg.com/v2-b9d232ca7875ca6db8e739a34fa0ee74_b.jpg" alt=""></p><ol start="2"><li>training steps的影响</li></ol><p><img src="https://pic1.zhimg.com/v2-70035953238890d3dce14b7e57966a03_b.jpg" alt=""></p><ol start="3"><li>BERT+feature-based</li></ol><p><img src="https://pic1.zhimg.com/v2-596cd8e36594741f803ef5fc623cdcf8_b.jpg" alt=""></p><h1 id="how"><a href="#how" class="headerlink" title="how"></a>how</h1><p>目前非官方的<a href="https://github.com/codertimo/BERT-pytorch" target="_blank" rel="noopener">pytorch实现</a>。</p><h2 id="核心模型代码"><a href="#核心模型代码" class="headerlink" title="核心模型代码"></a>核心模型代码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># model overview</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BERT</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    BERT model : Bidirectional Encoder Representations from Transformers.</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, vocab_size, hidden=<span class="number">768</span>, n_layers=<span class="number">12</span>, attn_heads=<span class="number">12</span>, dropout=<span class="number">0.1</span>)</span>:</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        :param vocab_size: vocab_size of total words</span></span><br><span class="line"><span class="string">        :param hidden: BERT model hidden size</span></span><br><span class="line"><span class="string">        :param n_layers: numbers of Transformer blocks(layers)</span></span><br><span class="line"><span class="string">        :param attn_heads: number of attention heads</span></span><br><span class="line"><span class="string">        :param dropout: dropout rate</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        super().__init__()</span><br><span class="line">        self.hidden = hidden</span><br><span class="line">        self.n_layers = n_layers</span><br><span class="line">        self.attn_heads = attn_heads</span><br><span class="line">        <span class="comment"># paper noted they used 4*hidden_size for ff_network_hidden_size</span></span><br><span class="line">        self.feed_forward_hidden = hidden * <span class="number">4</span></span><br><span class="line">        <span class="comment"># embedding for BERT, sum of positional, segment, token embeddings</span></span><br><span class="line">        self.embedding = BERTEmbedding(vocab_size=vocab_size, embed_size=hidden)</span><br><span class="line">        <span class="comment"># multi-layers transformer blocks, deep network</span></span><br><span class="line">        self.transformer_blocks = nn.ModuleList(</span><br><span class="line">            [TransformerBlock(hidden, attn_heads, hidden * <span class="number">4</span>, dropout) <span class="keyword">for</span> _ <span class="keyword">in</span> range(n_layers)])</span><br><span class="line">            </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, x, segment_info)</span>:</span></span><br><span class="line">        <span class="comment"># attention masking for padded token</span></span><br><span class="line">        <span class="comment"># torch.ByteTensor([batch_size, 1, seq_len, seq_len)</span></span><br><span class="line">        mask = (x &gt; <span class="number">0</span>).unsqueeze(<span class="number">1</span>).repeat(<span class="number">1</span>, x.size(<span class="number">1</span>), <span class="number">1</span>).unsqueeze(<span class="number">1</span>)</span><br><span class="line">        <span class="comment"># embedding the indexed sequence to sequence of vectors</span></span><br><span class="line">        x = self.embedding(x, segment_info)</span><br><span class="line">        <span class="comment"># running over multiple transformer blocks</span></span><br><span class="line">        <span class="keyword">for</span> transformer <span class="keyword">in</span> self.transformer_blocks:</span><br><span class="line">            x = transformer.forward(x, mask)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> x</span><br></pre></td></tr></table></figure><h1 id="目前对我们的用处"><a href="#目前对我们的用处" class="headerlink" title="目前对我们的用处"></a>目前对我们的用处</h1><ol><li>character-level word vectors: fasttext in chinese?</li><li>semantic analysis</li><li>entity recognition</li><li>relation extraction: Non-related corpus construction.</li><li>Chinese corpus? wait for model and fine-tune it…</li><li>对于生成模型是否有帮助（诸如NMT，image captioning）？</li><li>对于生成模型的benchmark是否有帮助？比如可以根据BERT的结果计算一个metric，然后针对不同任务都有类似的评价指标？</li><li>该网络是否可以更加简化？</li><li>和强化学习有和关联或者应用？</li></ol><h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol><li><a href="https://github.com/allenai/allennlp/blob/master/tutorials/how_to/elmo.md" target="_blank" rel="noopener">ELMo: Deep contextualized word representations</a></li><li><a href="https://blog.openai.com/language-unsupervised/" target="_blank" rel="noopener">Improving Language Understanding with Unsupervised Learning</a></li><li><a href="https://www.reddit.com/r/MachineLearning/comments/9nfqxz/r_bert_pretraining_of_deep_bidirectional/" target="_blank" rel="noopener">BERT reddit discussion</a></li></ol>]]></content>
+      
+      
       <categories>
-        <category>NLP</category>
-        <category>word vectors</category>
+          
+          <category> NLP </category>
+          
+          <category> word vectors </category>
+          
       </categories>
-      <tags>
-        <tag>NLP</tag>
-        <tag>word vectors</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>semi-supervised learning in NLP</title>
-    <url>/2018/03/22/semi-supervised-learning-in-NLP/</url>
-    <content><![CDATA[<h1 id="Semi-supervised-learning-on-NLP"><a href="#Semi-supervised-learning-on-NLP" class="headerlink" title="Semi-supervised learning on NLP"></a>Semi-supervised learning on NLP</h1><p>参考<a href="http://web.stanford.edu/class/cs224n/lectures/lecture17.pdf" target="_blank" rel="noopener">stanford nlp 2018 lecture 17</a>。</p>
-<p>Suggested Readings:</p>
-<ul>
-<li>[Semi-Supervised Sequence Learning]</li>
-<li>[Learned in Translation: Contextualized Word Vectors]</li>
-<li>[Deep Contextualized Word Representations]</li>
-<li>[Adversarial Training Methods for Semi-Supervised Text Classification]</li>
-</ul>
-<p>这里讲解三种主要的半监督学习技术：</p>
-<h2 id="1-Pre-training"><a href="#1-Pre-training" class="headerlink" title="1. Pre-training"></a>1. Pre-training</h2><a id="more"></a>
-<p>预训练分成两个主要阶段：</p>
-<ul>
-<li>首先在无标签样本上的无监督模型</li>
-<li>然后将无监督模型的权重迁移到监督模型，再在有标签数据上进行训练（这里有不同模型会在无监督模型的权重上进行fine-tune，有些不会）</li>
-</ul>
-<p>流程如下图所示：</p>
-<p><img src="http://ww1.sinaimg.cn/large/a0ca074cgy1ftiow9kkizj20lr0bxmz1.jpg" alt=""></p>
-<p>大家熟悉的典型例子是<strong>Word2Vec</strong>：</p>
-<ul>
-<li>shared part of the model: word embedding；</li>
-<li>没有unsupervised-only部分；</li>
-<li>supervised-only部分是除去word embedding 之外的模型；</li>
-</ul>
-<p>下面考虑一下，为何<strong>pre-training</strong>这种策略可以work呢？</p>
-<p>其实可以将这种预训练当做有监督学习模型的一种更加<strong>智能</strong>的初始化。换句话说，此时输入模型的不再是raw data，需要模型从中自主学习诸如词义、句义等相关表示，而是直接将这种表示直接作为输入塞入模型。</p>
-<p><img src="http://ww1.sinaimg.cn/large/a0ca074cgy1ftipd1f38ej20mp0atabc.jpg" alt=""></p>
-<p>具体应用到NLP中，“预训练”这种策略是如何生效的呢？一般来说，大多数基于神经网络的NLP应用框架如下所示：</p>
-<p><img src="http://ww1.sinaimg.cn/large/a0ca074cgy1ftir5slb5mj20dy0fl75h.jpg" alt=""></p>
-<p>这里<code>Embedding loookup</code>层一般对应于这里的预训练层，当然，目前也有一些其他模型会区分<code>pre-trained encoder</code>和<code>supervised encoder</code>。</p>
-<p>下面介绍三种pre-training的策略：</p>
-<h3 id="1-Auto-encoder"><a href="#1-Auto-encoder" class="headerlink" title="1) Auto-encoder"></a>1) Auto-encoder</h3><p>这里应用自编码机的最主要目的是为了获取输入数据中最核心的信息，而<strong>“核心信息”</strong>的定义这里是基于一个假设：可以被无损重构的信息。在训练完成Auto-encoder之后，去除decoder部分，直接把encoder的结果作为后续神经网络的输入即可。框架如下：</p>
-<p><img src="http://ww1.sinaimg.cn/large/a0ca074cgy1ftiri528utj20jw09sdgy.jpg" alt=""></p>
-<h3 id="2-CoVe"><a href="#2-CoVe" class="headerlink" title="2) CoVe"></a>2) CoVe</h3><h3 id="3-ELMo"><a href="#3-ELMo" class="headerlink" title="3) ELMo"></a>3) ELMo</h3><h2 id="2-Self-training"><a href="#2-Self-training" class="headerlink" title="2. Self-training"></a>2. Self-training</h2><h2 id="3-Consistency-regularization"><a href="#3-Consistency-regularization" class="headerlink" title="3. Consistency regularization"></a>3. Consistency regularization</h2>]]></content>
+      
+      
+        <tags>
+            
+            <tag> NLP </tag>
+            
+            <tag> word vectors </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>semi-supervised learning in NLP</title>
+      <link href="/2018/03/22/semi-supervised-learning-in-NLP/"/>
+      <url>/2018/03/22/semi-supervised-learning-in-NLP/</url>
+      
+        <content type="html"><![CDATA[<h1 id="Semi-supervised-learning-on-NLP"><a href="#Semi-supervised-learning-on-NLP" class="headerlink" title="Semi-supervised learning on NLP"></a>Semi-supervised learning on NLP</h1><p>参考<a href="http://web.stanford.edu/class/cs224n/lectures/lecture17.pdf" target="_blank" rel="noopener">stanford nlp 2018 lecture 17</a>。</p><p>Suggested Readings:</p><ul><li>[Semi-Supervised Sequence Learning]</li><li>[Learned in Translation: Contextualized Word Vectors]</li><li>[Deep Contextualized Word Representations]</li><li>[Adversarial Training Methods for Semi-Supervised Text Classification]</li></ul><p>这里讲解三种主要的半监督学习技术：</p><h2 id="1-Pre-training"><a href="#1-Pre-training" class="headerlink" title="1. Pre-training"></a>1. Pre-training</h2><a id="more"></a><p>预训练分成两个主要阶段：</p><ul><li>首先在无标签样本上的无监督模型</li><li>然后将无监督模型的权重迁移到监督模型，再在有标签数据上进行训练（这里有不同模型会在无监督模型的权重上进行fine-tune，有些不会）</li></ul><p>流程如下图所示：</p><p><img src="http://ww1.sinaimg.cn/large/a0ca074cgy1ftiow9kkizj20lr0bxmz1.jpg" alt=""></p><p>大家熟悉的典型例子是<strong>Word2Vec</strong>：</p><ul><li>shared part of the model: word embedding；</li><li>没有unsupervised-only部分；</li><li>supervised-only部分是除去word embedding 之外的模型；</li></ul><p>下面考虑一下，为何<strong>pre-training</strong>这种策略可以work呢？</p><p>其实可以将这种预训练当做有监督学习模型的一种更加<strong>智能</strong>的初始化。换句话说，此时输入模型的不再是raw data，需要模型从中自主学习诸如词义、句义等相关表示，而是直接将这种表示直接作为输入塞入模型。</p><p><img src="http://ww1.sinaimg.cn/large/a0ca074cgy1ftipd1f38ej20mp0atabc.jpg" alt=""></p><p>具体应用到NLP中，“预训练”这种策略是如何生效的呢？一般来说，大多数基于神经网络的NLP应用框架如下所示：</p><p><img src="http://ww1.sinaimg.cn/large/a0ca074cgy1ftir5slb5mj20dy0fl75h.jpg" alt=""></p><p>这里<code>Embedding loookup</code>层一般对应于这里的预训练层，当然，目前也有一些其他模型会区分<code>pre-trained encoder</code>和<code>supervised encoder</code>。</p><p>下面介绍三种pre-training的策略：</p><h3 id="1-Auto-encoder"><a href="#1-Auto-encoder" class="headerlink" title="1) Auto-encoder"></a>1) Auto-encoder</h3><p>这里应用自编码机的最主要目的是为了获取输入数据中最核心的信息，而<strong>“核心信息”</strong>的定义这里是基于一个假设：可以被无损重构的信息。在训练完成Auto-encoder之后，去除decoder部分，直接把encoder的结果作为后续神经网络的输入即可。框架如下：</p><p><img src="http://ww1.sinaimg.cn/large/a0ca074cgy1ftiri528utj20jw09sdgy.jpg" alt=""></p><h3 id="2-CoVe"><a href="#2-CoVe" class="headerlink" title="2) CoVe"></a>2) CoVe</h3><h3 id="3-ELMo"><a href="#3-ELMo" class="headerlink" title="3) ELMo"></a>3) ELMo</h3><h2 id="2-Self-training"><a href="#2-Self-training" class="headerlink" title="2. Self-training"></a>2. Self-training</h2><h2 id="3-Consistency-regularization"><a href="#3-Consistency-regularization" class="headerlink" title="3. Consistency regularization"></a>3. Consistency regularization</h2>]]></content>
+      
+      
       <categories>
-        <category>NLP</category>
+          
+          <category> NLP </category>
+          
       </categories>
-      <tags>
-        <tag>NLP</tag>
-        <tag>semi-supervised learning</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>理解Learning to Rank算法</title>
-    <url>/2017/08/06/understanding-Learning-to-Rank/</url>
-    <content><![CDATA[<p>排序学习是一个有监督的机器学习过程，对每一个给定的查询－文档对，抽取特征，通过日志挖掘或者人工标注的方法获得真实数据标注。然后通过排序模型，使得输入能够和实际的数据相似。</p>
-<p><img src="http://kubicode.me/img/Learning-To-Rank-Base-Knowledge/lrt_framework.png" alt="image"><br><a id="more"></a></p>
-<h3 id="1-LTR的流程"><a href="#1-LTR的流程" class="headerlink" title="1. LTR的流程"></a>1. LTR的流程</h3><ul>
-<li>Collect Training Data (Queries and their labeled documents) </li>
-<li>Feature Extraction for Query-document Pairs</li>
-<li>Learning the Ranking Model by Minimizing a Loss Function on the Training Data</li>
-<li>Use the Model to Answer Online Queries</li>
-</ul>
-<h3 id="2-训练数据的获取"><a href="#2-训练数据的获取" class="headerlink" title="2. 训练数据的获取"></a>2. 训练数据的获取</h3><p>有2种获取训练数据的来源:1）人工标注；2）搜索日志。</p>
-<ul>
-<li>1) 人工标注</li>
-</ul>
-<p>从搜索日志中随机选取一部分Query，让受过专业训练的数据评估员对”Query-Url对”给出相关性判断。常见的是5档的评分:差、一般、好、优秀、完美。以此作为训练数据。人工标注是标注者的主观判断，会受标注者背景知识等因素的影响。</p>
-<ul>
-<li>2) 搜索日志</li>
-</ul>
-<p>使用点击日志的偏多。比如，结果ABC分别位于123位，B比A位置低，但却得到了更多的点击，<br>那么B的相关性可能好于A。</p>
-<ul>
-<li>3) 公开数据集</li>
-</ul>
-<p>现存一批公开的数据集可以使用</p>
-<blockquote>
-<ul>
-<li>LETOR, <a href="http://research.microsoft.com/en-us/um/beijing/projects/letor/" target="_blank" rel="noopener">http://research.microsoft.com/en-us/um/beijing/projects/letor/</a></li>
-<li>Microsoft Learning to Rank Dataset, <a href="http://research.microsoft.com/en-us/projects/mslr/" target="_blank" rel="noopener">http://research.microsoft.com/en-us/projects/mslr/</a></li>
-<li>Yahoo Learning to Rank Challenge, <a href="http://webscope.sandbox.yahoo.com/" target="_blank" rel="noopener">http://webscope.sandbox.yahoo.com/</a></li>
-</ul>
-</blockquote>
-<h3 id="3-特征提取（特征工程）"><a href="#3-特征提取（特征工程）" class="headerlink" title="3. 特征提取（特征工程）"></a>3. 特征提取（特征工程）</h3><p>搜索引擎会使用一系列特征来决定结果的排序。</p>
-<p>feature可以分为：</p>
-<ul>
-<li>Doc本身的特征：Pagerank、内容丰富度、是否是spam等</li>
-<li>Query-Doc的特征：文本相关性、query和doc共现的词在文档/查询中出现的次数等</li>
-</ul>
-<p>此阶段就是要抽取出所有的特征，供后续训练使用。（一般是最耗时间和最影响模型结果的步骤）</p>
-<h3 id="4-模型"><a href="#4-模型" class="headerlink" title="4. 模型"></a>4. 模型</h3><p>常用的排序学习分为三种类型：PointWise，PairWise和ListWise。</p>
-<h4 id="PointWise"><a href="#PointWise" class="headerlink" title="PointWise"></a>PointWise</h4><p>输入：单独的一篇文档</p>
-<p>过程：文档-&gt;特征向量-&gt;模型得到回归/分类结果</p>
-<p>输出：根据模型得到的文档的score；然后根据score排序。</p>
-<p>优点:<br>速度快，复杂度低.</p>
-<p>缺点:<br>效果一般<br>没有考虑到文档之间的相对关系<br>忽略了文档相关度与查询的关联，比如Top Query排在后面的相关性比Tial Query排在前面的都要高，导致训练样本不一致</p>
-<h4 id="PairWise"><a href="#PairWise" class="headerlink" title="PairWise"></a>PairWise</h4><p>对于搜索任务来说，系统接收到用户查询后，返回相关文档列表，所以问题的关键是确定文档之间的先后相对顺序关系，<br>而Pairwise则将重点转向对文档关系是否合理的判断.</p>
-<p>虽然Pairwise方法对Pointwise方法做了改进，但是也明显存在两个问题:</p>
-<ul>
-<li>只考虑了两个文档的先后顺序，没有考虑文档出现在搜索列表中的位置</li>
-<li>不同的查询，其相关文档数量差异很大，转换为文档对之后，有的查询可能有几百对文档，有的可能只有几十个，最终对机器学习的效果评价造成困难</li>
-</ul>
-<h4 id="ListWise"><a href="#ListWise" class="headerlink" title="ListWise"></a>ListWise</h4><p>与Pointwise和Pairwise不同，Listwise是将一个查询对应的所有搜索结果列表作为一个训练实例，因此也称为文档列方法.</p>
-<h3 id="5-模型评估"><a href="#5-模型评估" class="headerlink" title="5. 模型评估"></a>5. 模型评估</h3><ul>
-<li>MAP</li>
-</ul>
-<p>MAP(Mean Average Precision)表示文档在排序中的平均精度均值，是用于衡量个query查询见过的平均精度值AP,<br>系统检索出来的相关文档越靠前(rank 越高)，MAP就可能越高。如果系统没有返回相关文档，则准确率默认为0。</p>
-<ul>
-<li>NDCG</li>
-</ul>
-<p>NDCG表示表示归一化折损累积增益，主要是衡量实际相关性越高的文档排在越前面</p>
-<h3 id="5-综述"><a href="#5-综述" class="headerlink" title="5. 综述"></a>5. 综述</h3><p>搜索引擎时敲定特征分的权重是非常疼的一件事儿，而LTR正好帮你定分，LTR的三种实现方法其实各有优劣：</p>
-<ul>
-<li>难点主要在训练样本的构建(人工或者挖日志)，另外就是训练复杂</li>
-<li>虽说Listwise效果最好，pointwise使用还是比较多，参考这篇文章<a href="http://www.cnblogs.com/zjgtan/p/3652689.html" target="_blank" rel="noopener">综述LTR</a>体验下</li>
-<li>在工业界用的比较多的应该还是Pairwise，因为他构建训练样本相对方便，并且复杂度也还可以，所以Rank SVM就很火</li>
-</ul>
-<h3 id="结合ES和LTR"><a href="#结合ES和LTR" class="headerlink" title="结合ES和LTR"></a>结合ES和LTR</h3><p><a href="https://github.com/o19s/elasticsearch-learning-to-rank" target="_blank" rel="noopener">https://github.com/o19s/elasticsearch-learning-to-rank</a></p>
-<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a href="http://blog.csdn.net/LG1259156776/article/details/52749851" target="_blank" rel="noopener">参考资料-1</a></p>
-<p><a href="http://kubicode.me/2016/02/15/Machine%20Learning/Learning-To-Rank-Base-Knowledge/" target="_blank" rel="noopener">参考资料-2</a></p>
-]]></content>
+      
+      
+        <tags>
+            
+            <tag> NLP </tag>
+            
+            <tag> semi-supervised learning </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>理解Learning to Rank算法</title>
+      <link href="/2017/08/06/understanding-Learning-to-Rank/"/>
+      <url>/2017/08/06/understanding-Learning-to-Rank/</url>
+      
+        <content type="html"><![CDATA[<p>排序学习是一个有监督的机器学习过程，对每一个给定的查询－文档对，抽取特征，通过日志挖掘或者人工标注的方法获得真实数据标注。然后通过排序模型，使得输入能够和实际的数据相似。</p><p><img src="http://kubicode.me/img/Learning-To-Rank-Base-Knowledge/lrt_framework.png" alt="image"><br><a id="more"></a></p><h3 id="1-LTR的流程"><a href="#1-LTR的流程" class="headerlink" title="1. LTR的流程"></a>1. LTR的流程</h3><ul><li>Collect Training Data (Queries and their labeled documents) </li><li>Feature Extraction for Query-document Pairs</li><li>Learning the Ranking Model by Minimizing a Loss Function on the Training Data</li><li>Use the Model to Answer Online Queries</li></ul><h3 id="2-训练数据的获取"><a href="#2-训练数据的获取" class="headerlink" title="2. 训练数据的获取"></a>2. 训练数据的获取</h3><p>有2种获取训练数据的来源:1）人工标注；2）搜索日志。</p><ul><li>1) 人工标注</li></ul><p>从搜索日志中随机选取一部分Query，让受过专业训练的数据评估员对”Query-Url对”给出相关性判断。常见的是5档的评分:差、一般、好、优秀、完美。以此作为训练数据。人工标注是标注者的主观判断，会受标注者背景知识等因素的影响。</p><ul><li>2) 搜索日志</li></ul><p>使用点击日志的偏多。比如，结果ABC分别位于123位，B比A位置低，但却得到了更多的点击，<br>那么B的相关性可能好于A。</p><ul><li>3) 公开数据集</li></ul><p>现存一批公开的数据集可以使用</p><blockquote><ul><li>LETOR, <a href="http://research.microsoft.com/en-us/um/beijing/projects/letor/" target="_blank" rel="noopener">http://research.microsoft.com/en-us/um/beijing/projects/letor/</a></li><li>Microsoft Learning to Rank Dataset, <a href="http://research.microsoft.com/en-us/projects/mslr/" target="_blank" rel="noopener">http://research.microsoft.com/en-us/projects/mslr/</a></li><li>Yahoo Learning to Rank Challenge, <a href="http://webscope.sandbox.yahoo.com/" target="_blank" rel="noopener">http://webscope.sandbox.yahoo.com/</a></li></ul></blockquote><h3 id="3-特征提取（特征工程）"><a href="#3-特征提取（特征工程）" class="headerlink" title="3. 特征提取（特征工程）"></a>3. 特征提取（特征工程）</h3><p>搜索引擎会使用一系列特征来决定结果的排序。</p><p>feature可以分为：</p><ul><li>Doc本身的特征：Pagerank、内容丰富度、是否是spam等</li><li>Query-Doc的特征：文本相关性、query和doc共现的词在文档/查询中出现的次数等</li></ul><p>此阶段就是要抽取出所有的特征，供后续训练使用。（一般是最耗时间和最影响模型结果的步骤）</p><h3 id="4-模型"><a href="#4-模型" class="headerlink" title="4. 模型"></a>4. 模型</h3><p>常用的排序学习分为三种类型：PointWise，PairWise和ListWise。</p><h4 id="PointWise"><a href="#PointWise" class="headerlink" title="PointWise"></a>PointWise</h4><p>输入：单独的一篇文档</p><p>过程：文档-&gt;特征向量-&gt;模型得到回归/分类结果</p><p>输出：根据模型得到的文档的score；然后根据score排序。</p><p>优点:<br>速度快，复杂度低.</p><p>缺点:<br>效果一般<br>没有考虑到文档之间的相对关系<br>忽略了文档相关度与查询的关联，比如Top Query排在后面的相关性比Tial Query排在前面的都要高，导致训练样本不一致</p><h4 id="PairWise"><a href="#PairWise" class="headerlink" title="PairWise"></a>PairWise</h4><p>对于搜索任务来说，系统接收到用户查询后，返回相关文档列表，所以问题的关键是确定文档之间的先后相对顺序关系，<br>而Pairwise则将重点转向对文档关系是否合理的判断.</p><p>虽然Pairwise方法对Pointwise方法做了改进，但是也明显存在两个问题:</p><ul><li>只考虑了两个文档的先后顺序，没有考虑文档出现在搜索列表中的位置</li><li>不同的查询，其相关文档数量差异很大，转换为文档对之后，有的查询可能有几百对文档，有的可能只有几十个，最终对机器学习的效果评价造成困难</li></ul><h4 id="ListWise"><a href="#ListWise" class="headerlink" title="ListWise"></a>ListWise</h4><p>与Pointwise和Pairwise不同，Listwise是将一个查询对应的所有搜索结果列表作为一个训练实例，因此也称为文档列方法.</p><h3 id="5-模型评估"><a href="#5-模型评估" class="headerlink" title="5. 模型评估"></a>5. 模型评估</h3><ul><li>MAP</li></ul><p>MAP(Mean Average Precision)表示文档在排序中的平均精度均值，是用于衡量个query查询见过的平均精度值AP,<br>系统检索出来的相关文档越靠前(rank 越高)，MAP就可能越高。如果系统没有返回相关文档，则准确率默认为0。</p><ul><li>NDCG</li></ul><p>NDCG表示表示归一化折损累积增益，主要是衡量实际相关性越高的文档排在越前面</p><h3 id="5-综述"><a href="#5-综述" class="headerlink" title="5. 综述"></a>5. 综述</h3><p>搜索引擎时敲定特征分的权重是非常疼的一件事儿，而LTR正好帮你定分，LTR的三种实现方法其实各有优劣：</p><ul><li>难点主要在训练样本的构建(人工或者挖日志)，另外就是训练复杂</li><li>虽说Listwise效果最好，pointwise使用还是比较多，参考这篇文章<a href="http://www.cnblogs.com/zjgtan/p/3652689.html" target="_blank" rel="noopener">综述LTR</a>体验下</li><li>在工业界用的比较多的应该还是Pairwise，因为他构建训练样本相对方便，并且复杂度也还可以，所以Rank SVM就很火</li></ul><h3 id="结合ES和LTR"><a href="#结合ES和LTR" class="headerlink" title="结合ES和LTR"></a>结合ES和LTR</h3><p><a href="https://github.com/o19s/elasticsearch-learning-to-rank" target="_blank" rel="noopener">https://github.com/o19s/elasticsearch-learning-to-rank</a></p><h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a href="http://blog.csdn.net/LG1259156776/article/details/52749851" target="_blank" rel="noopener">参考资料-1</a></p><p><a href="http://kubicode.me/2016/02/15/Machine%20Learning/Learning-To-Rank-Base-Knowledge/" target="_blank" rel="noopener">参考资料-2</a></p>]]></content>
+      
+      
       <categories>
-        <category>Machine learning</category>
+          
+          <category> Machine learning </category>
+          
       </categories>
-      <tags>
-        <tag>Machine Learning</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>2015年排名前10的Python开发库</title>
-    <url>/2015/12/18/top-10-python-libraries-of-2015/</url>
-    <content><![CDATA[<p>来源：<a href="http://blog.tryolabs.com/2015/12/15/top-10-python-libraries-of-2015/" target="_blank" rel="noopener">http://blog.tryolabs.com/2015/12/15/top-10-python-libraries-of-2015/</a><br>作者：Alan<br>翻译：Louis Xu  </p>
-<p>随着新的一年即将到来，我们常常坐下来思考到底2015年我们做了些什么。毋庸置疑，如果不是基于开源社区的伟大贡献，我们很多的项目不会像现在这样成功，更不会提供出如此多可靠的，经过实践检验的开发库。</p>
-<a id="more"></a>
-<p>似乎很多人都在写他们心目中排名前10的列表，当然我们也不能免俗。下面介绍的是我们在2015年使用过的10个最好的Python库，我们觉得有义务让大家都熟悉他们（以下排名不分先后）。我们也会避免介绍那些太过出名的库，诸如Django, Flask, Django Rest框架等，而是将重点放在那些不太为大家所熟知的开发库上。详情如下：</p>
-<ol>
-<li><p>jupyter<br>试想一下，如果让一个画家在创作的时候不能立刻看到自己的画作，他的内心会如何抓狂。Jupyter Notebooks正是为了解决编写代码的时候遇到的类似问题。它使得代码，绘图和程序运行的结果可以更加直观地展现出来，而且它正越来越成为数据科学家们偏爱的工具库。所谓的Notebook就是代码和对应文档组合在一起的文档，基于这个特性，它是我们快速创建原型或者教程的得心应手的工具。<br>尽管我们仅仅将jupyter用来编写Python代码，但是截至目前，它已经添加了针对其他编程语言诸如Julia和Haskell的支持。</p>
-</li>
-<li><p>retrying<br>顾名思义，retrying库可以帮你避免一切不必要的重复劳动：它为你实现了重试的行为。它提供了一个通用的修饰器，这使得它能够毫不费力地赋予任何方法重试的能力，同时你可以对各种各样的属性进行配置以获得所需的重试行为。比如最多尝试次数，延迟，回退休眠，错误条件等等。它既轻量级又使用方便。</p>
-</li>
-<li><p>aiohttp<br>截至2015年，最重要的开发库都被移植到了Python 3，所以我们也开始拥抱这种趋势。我们非常喜欢使用asyncio包通过协同程序(coroutines)来编写并发程序，所以我们有必要有一个使用相同并发模式的HTTP客户端（比如HTTP请求）和服务器端。aiohttp开发库正是这样一个为asyncio提供了易于使用的HTTP客户机/服务器的开发库。</p>
-</li>
-<li><p>Plumbum<br>为了能够在Python程序里调用其他脚本或者可执行文件，我们已经尝试了多种将subprocess打包的方法，但是随着plumbum模式的出现，之前的方法都已无用武之地。<br>通过一个易于使用的语法，你可以执行本地或者远程的命令，从而以跨平台的方式得到输出结果或者错误代码。如果这些还无法满足需求，你可以通过组合的方式（按照shell管道的方式）和一个界面来创建命令行应用程序。不妨一试！</p>
-</li>
-<li><p>Phonenumbers<br>和电话号码打交道以及验证电话号码是一件真正痛苦的事情，因为这需要考虑国际冠码和区号，而且可能还有其他需要考虑的事情。该phonenumbers开发库是基于Google的libphonenumber移植而来并通过Python实现，值得庆幸的是该库大大简化了Google的libphonenumber库。它可以通过少量代码来用于解析，格式化和验证电话号码。更重要的是，phonenumbers可以区分一个电话号码是否是独一无二的(遵循E.164格式)。它同时适用于Python 2和Python 3。<br>我们已经在很多项目中广泛使用了这个库，主要是通过它和django-phonenumber-field接口的结合来解决几乎一直弹出的繁琐问题。</p>
-</li>
-<li><p>Networkx<br>图和网络通常用于许多不同的场景，例如组织数据或者展示数据流，抑或展示不同数据实体间的关系。利用Networkx可以创建并操作图和网络。Networkx使用的算法使其具有高可扩展性，该特性使得当处理复杂的图结构时它成为一个理想的选择。此外，大量的图渲染选项也使得它成为一款非常出色的可视化工具。</p>
-</li>
-<li><p>Influxdb<br>如果你正在考虑将数据负载以时间序列为基础进行存储，那么InfluxDB是你需要考虑的工具。<br>InfluxDB是一款时间序列数据库，一直以来，我们都在用它存储测量结果。只需要通过一个RESTful的API，我们可以轻易并有效地使用它。当谈论到大数据量的时候，这点尤为重要。此外，其内置的集群功能使得检索和数据分组都变得容易。这种官方的客户端通过调用API的方式抽象出了大部分的核心工作，尽管如此，我们还是希望看到它能够进一步改进成以Python化的方式来进行查询，而不是通过写原始的JSON来实现。</p>
-</li>
-<li><p>elasticsearch-dsl<br>如果你曾经使用过Elasticsearch，那你在检查冗长的JSON格式的查询语句时一定备受煎熬，浪费了大把时间想要找出到底是什么地方的解析出现了错误。Elasticsearch DSL客户端是完全建立在官方的Elasticsearch客户端基础之上，同时让你不需要被JSON语句的问题所困扰：你只需要使用Python定义的类或者类查询集的表达式即可。它还提供包装能够让你将文档作为Python的对象，映射关系等来进行处理。</p>
-</li>
-<li><p>Keras<br>深度学习是当前新的趋势，而这正是keras闪光的地方。它可以在Theano上运行，并可以通过各种神经网络的架构来进行快速实验。通过高度模块化和简约性，它可以在CPU和GPU上无缝运行。针对2015年度我们所解决的一些研发项目，类似keras这样的一个组成部分是至关紧要的。</p>
-</li>
-<li><p>Genism<br>如果你对自然语言处理(NLP)感兴趣但是还没听说过Gensim，那你真是太与世隔绝了。它提供了一些最常用算法的快速，可扩展(独立内存)的实现，诸如tf-idf, word2vec, doc2vec, LSA等等，同时提供了一个易于使用且有据可查的接口。</p>
-</li>
-</ol>
-<p>最后的彩蛋: MonkeyLearn Python  </p>
-<p>最后我们不能不考虑MonkeyLearn开发库。它是Tryolabs出品的一款分支于自己公司的产品，它通过一个易于使用的RESTFul的API提供了云端的文本挖掘。通过它你可以得到诸如情绪观点，最重要的关键字的深入理解，还可以进行主题检测，以及其他一切你可以通过自定义的文本分类器可以做到的事情。MonkeyLearn Python是这个API的官方客户端，它同时支持Python 2和Python 3。</p>
-]]></content>
+      
+      
+        <tags>
+            
+            <tag> Machine Learning </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>2015年排名前10的Python开发库</title>
+      <link href="/2015/12/18/top-10-python-libraries-of-2015/"/>
+      <url>/2015/12/18/top-10-python-libraries-of-2015/</url>
+      
+        <content type="html"><![CDATA[<p>来源：<a href="http://blog.tryolabs.com/2015/12/15/top-10-python-libraries-of-2015/" target="_blank" rel="noopener">http://blog.tryolabs.com/2015/12/15/top-10-python-libraries-of-2015/</a><br>作者：Alan<br>翻译：Louis Xu  </p><p>随着新的一年即将到来，我们常常坐下来思考到底2015年我们做了些什么。毋庸置疑，如果不是基于开源社区的伟大贡献，我们很多的项目不会像现在这样成功，更不会提供出如此多可靠的，经过实践检验的开发库。</p><a id="more"></a><p>似乎很多人都在写他们心目中排名前10的列表，当然我们也不能免俗。下面介绍的是我们在2015年使用过的10个最好的Python库，我们觉得有义务让大家都熟悉他们（以下排名不分先后）。我们也会避免介绍那些太过出名的库，诸如Django, Flask, Django Rest框架等，而是将重点放在那些不太为大家所熟知的开发库上。详情如下：</p><ol><li><p>jupyter<br>试想一下，如果让一个画家在创作的时候不能立刻看到自己的画作，他的内心会如何抓狂。Jupyter Notebooks正是为了解决编写代码的时候遇到的类似问题。它使得代码，绘图和程序运行的结果可以更加直观地展现出来，而且它正越来越成为数据科学家们偏爱的工具库。所谓的Notebook就是代码和对应文档组合在一起的文档，基于这个特性，它是我们快速创建原型或者教程的得心应手的工具。<br>尽管我们仅仅将jupyter用来编写Python代码，但是截至目前，它已经添加了针对其他编程语言诸如Julia和Haskell的支持。</p></li><li><p>retrying<br>顾名思义，retrying库可以帮你避免一切不必要的重复劳动：它为你实现了重试的行为。它提供了一个通用的修饰器，这使得它能够毫不费力地赋予任何方法重试的能力，同时你可以对各种各样的属性进行配置以获得所需的重试行为。比如最多尝试次数，延迟，回退休眠，错误条件等等。它既轻量级又使用方便。</p></li><li><p>aiohttp<br>截至2015年，最重要的开发库都被移植到了Python 3，所以我们也开始拥抱这种趋势。我们非常喜欢使用asyncio包通过协同程序(coroutines)来编写并发程序，所以我们有必要有一个使用相同并发模式的HTTP客户端（比如HTTP请求）和服务器端。aiohttp开发库正是这样一个为asyncio提供了易于使用的HTTP客户机/服务器的开发库。</p></li><li><p>Plumbum<br>为了能够在Python程序里调用其他脚本或者可执行文件，我们已经尝试了多种将subprocess打包的方法，但是随着plumbum模式的出现，之前的方法都已无用武之地。<br>通过一个易于使用的语法，你可以执行本地或者远程的命令，从而以跨平台的方式得到输出结果或者错误代码。如果这些还无法满足需求，你可以通过组合的方式（按照shell管道的方式）和一个界面来创建命令行应用程序。不妨一试！</p></li><li><p>Phonenumbers<br>和电话号码打交道以及验证电话号码是一件真正痛苦的事情，因为这需要考虑国际冠码和区号，而且可能还有其他需要考虑的事情。该phonenumbers开发库是基于Google的libphonenumber移植而来并通过Python实现，值得庆幸的是该库大大简化了Google的libphonenumber库。它可以通过少量代码来用于解析，格式化和验证电话号码。更重要的是，phonenumbers可以区分一个电话号码是否是独一无二的(遵循E.164格式)。它同时适用于Python 2和Python 3。<br>我们已经在很多项目中广泛使用了这个库，主要是通过它和django-phonenumber-field接口的结合来解决几乎一直弹出的繁琐问题。</p></li><li><p>Networkx<br>图和网络通常用于许多不同的场景，例如组织数据或者展示数据流，抑或展示不同数据实体间的关系。利用Networkx可以创建并操作图和网络。Networkx使用的算法使其具有高可扩展性，该特性使得当处理复杂的图结构时它成为一个理想的选择。此外，大量的图渲染选项也使得它成为一款非常出色的可视化工具。</p></li><li><p>Influxdb<br>如果你正在考虑将数据负载以时间序列为基础进行存储，那么InfluxDB是你需要考虑的工具。<br>InfluxDB是一款时间序列数据库，一直以来，我们都在用它存储测量结果。只需要通过一个RESTful的API，我们可以轻易并有效地使用它。当谈论到大数据量的时候，这点尤为重要。此外，其内置的集群功能使得检索和数据分组都变得容易。这种官方的客户端通过调用API的方式抽象出了大部分的核心工作，尽管如此，我们还是希望看到它能够进一步改进成以Python化的方式来进行查询，而不是通过写原始的JSON来实现。</p></li><li><p>elasticsearch-dsl<br>如果你曾经使用过Elasticsearch，那你在检查冗长的JSON格式的查询语句时一定备受煎熬，浪费了大把时间想要找出到底是什么地方的解析出现了错误。Elasticsearch DSL客户端是完全建立在官方的Elasticsearch客户端基础之上，同时让你不需要被JSON语句的问题所困扰：你只需要使用Python定义的类或者类查询集的表达式即可。它还提供包装能够让你将文档作为Python的对象，映射关系等来进行处理。</p></li><li><p>Keras<br>深度学习是当前新的趋势，而这正是keras闪光的地方。它可以在Theano上运行，并可以通过各种神经网络的架构来进行快速实验。通过高度模块化和简约性，它可以在CPU和GPU上无缝运行。针对2015年度我们所解决的一些研发项目，类似keras这样的一个组成部分是至关紧要的。</p></li><li><p>Genism<br>如果你对自然语言处理(NLP)感兴趣但是还没听说过Gensim，那你真是太与世隔绝了。它提供了一些最常用算法的快速，可扩展(独立内存)的实现，诸如tf-idf, word2vec, doc2vec, LSA等等，同时提供了一个易于使用且有据可查的接口。</p></li></ol><p>最后的彩蛋: MonkeyLearn Python  </p><p>最后我们不能不考虑MonkeyLearn开发库。它是Tryolabs出品的一款分支于自己公司的产品，它通过一个易于使用的RESTFul的API提供了云端的文本挖掘。通过它你可以得到诸如情绪观点，最重要的关键字的深入理解，还可以进行主题检测，以及其他一切你可以通过自定义的文本分类器可以做到的事情。MonkeyLearn Python是这个API的官方客户端，它同时支持Python 2和Python 3。</p>]]></content>
+      
+      
       <categories>
-        <category>Python</category>
+          
+          <category> Python </category>
+          
       </categories>
-      <tags>
-        <tag>python</tag>
-      </tags>
-  </entry>
+      
+      
+        <tags>
+            
+            <tag> python </tag>
+            
+        </tags>
+      
+    </entry>
+    
+  
+  
 </search>

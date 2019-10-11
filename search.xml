@@ -43,7 +43,10 @@
 </ul>
 <h3 id="框架"><a href="#框架" class="headerlink" title="框架"></a>框架</h3><ul>
 <li>双向语言模型<ul>
-<li>$\sum_{k=1}^{N}(log p(t_k|t_1,…,t_{k-1};\Theta_x,\overrightarrow{\Theta}<em>{LSTM}, \Theta_s) + log p(t_k|t</em>{k+1},…,t_{N};\Theta_x,\overleftarrow{\Theta}_{LSTM}, \Theta_s))$</li>
+<li>as follows: <ul>
+<li>$$\sum_{k=1}^{N}(log p(t_k|t_1,…,t_{k-1};\Theta_x,\overrightarrow{\Theta}<em>{LSTM}, \Theta_s) + log p(t_k|t</em>{k+1},…,t_{N};\Theta_x,\overleftarrow{\Theta}_{LSTM}, \Theta_s))$$</li>
+</ul>
+</li>
 <li>两个方向上的一些参数会共享</li>
 </ul>
 </li>

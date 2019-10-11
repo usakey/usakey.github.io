@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.4.1">
+  <link rel="mask-icon" href="/images/logo.svg?v=7.4.1" color="#222">
+
+<link rel="stylesheet" href="/css/main.css?v=7.4.1">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.4.1',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="Semi-supervised learning on NLP参考stanford nlp 2018 lecture 17。 Suggested Readings:  [Semi-Supervised Sequence Learning] [Learned in Translation: Contextualized Word Vectors] [Deep Contextualized Word">
+<meta name="keywords" content="NLP,semi-supervised learning">
+<meta property="og:type" content="article">
+<meta property="og:title" content="semi-supervised learning in NLP">
+<meta property="og:url" content="http://yoursite.com/2018/03/22/semi-supervised-learning-in-NLP/index.html">
+<meta property="og:site_name" content="随想空间">
+<meta property="og:description" content="Semi-supervised learning on NLP参考stanford nlp 2018 lecture 17。 Suggested Readings:  [Semi-Supervised Sequence Learning] [Learned in Translation: Contextualized Word Vectors] [Deep Contextualized Word">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/a0ca074cgy1ftiow9kkizj20lr0bxmz1.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/a0ca074cgy1ftipd1f38ej20mp0atabc.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/a0ca074cgy1ftir5slb5mj20dy0fl75h.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/a0ca074cgy1ftiri528utj20jw09sdgy.jpg">
+<meta property="og:updated_time" content="2019-10-11T04:42:44.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="semi-supervised learning in NLP">
+<meta name="twitter:description" content="Semi-supervised learning on NLP参考stanford nlp 2018 lecture 17。 Suggested Readings:  [Semi-Supervised Sequence Learning] [Learned in Translation: Contextualized Word Vectors] [Deep Contextualized Word">
+<meta name="twitter:image" content="http://ww1.sinaimg.cn/large/a0ca074cgy1ftiow9kkizj20lr0bxmz1.jpg">
+  <link rel="canonical" href="http://yoursite.com/2018/03/22/semi-supervised-learning-in-NLP/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>semi-supervised learning in NLP | 随想空间</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7db625a1dcd8f7a1d33faaf2d5cf0a59";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随想空间</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+        
+        
+        <li class="menu-item menu-item-home">
+      
+    
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+      
+    
+      
+      
+        
+        
+        <li class="menu-item menu-item-categories">
+      
+    
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+      
+    
+      
+      
+        
+        
+        <li class="menu-item menu-item-tags">
+      
+    
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+      
+    
+      
+      
+        
+        
+        <li class="menu-item menu-item-archives">
+      
+    
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      
+    
+      
+      
+        
+        
+        <li class="menu-item menu-item-about">
+      
+    
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      
+    
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger">
+        
+          <i class="fa fa-search fa-fw"></i>
+        
+        搜索
+        </a>
+      </li>
+    
+  </ul>
+
+    
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/22/semi-supervised-learning-in-NLP/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="小石头">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随想空间">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            semi-supervised learning in NLP
+            
+
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2018-03-22 16:29:52" itemprop="dateCreated datePublished" datetime="2018-03-22T16:29:52+08:00">2018-03-22</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-11 12:42:44" itemprop="dateModified" datetime="2019-10-11T12:42:44+08:00">2019-10-11</time>
+              </span>
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/NLP/" itemprop="url" rel="index">
+                    <span itemprop="name">NLP</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            <span id="/2018/03/22/semi-supervised-learning-in-NLP/" class="post-meta-item leancloud_visitors" data-flag-title="semi-supervised learning in NLP" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+        
+      
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2018/03/22/semi-supervised-learning-in-NLP/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2018/03/22/semi-supervised-learning-in-NLP/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Semi-supervised-learning-on-NLP"><a href="#Semi-supervised-learning-on-NLP" class="headerlink" title="Semi-supervised learning on NLP"></a>Semi-supervised learning on NLP</h1><p>参考<a href="http://web.stanford.edu/class/cs224n/lectures/lecture17.pdf" target="_blank" rel="noopener">stanford nlp 2018 lecture 17</a>。</p>
+<p>Suggested Readings:</p>
+<ul>
+<li>[Semi-Supervised Sequence Learning]</li>
+<li>[Learned in Translation: Contextualized Word Vectors]</li>
+<li>[Deep Contextualized Word Representations]</li>
+<li>[Adversarial Training Methods for Semi-Supervised Text Classification]</li>
+</ul>
+<p>这里讲解三种主要的半监督学习技术：</p>
+<h2 id="1-Pre-training"><a href="#1-Pre-training" class="headerlink" title="1. Pre-training"></a>1. Pre-training</h2><a id="more"></a>
+<p>预训练分成两个主要阶段：</p>
+<ul>
+<li>首先在无标签样本上的无监督模型</li>
+<li>然后将无监督模型的权重迁移到监督模型，再在有标签数据上进行训练（这里有不同模型会在无监督模型的权重上进行fine-tune，有些不会）</li>
+</ul>
+<p>流程如下图所示：</p>
+<p><img src="http://ww1.sinaimg.cn/large/a0ca074cgy1ftiow9kkizj20lr0bxmz1.jpg" alt></p>
+<p>大家熟悉的典型例子是<strong>Word2Vec</strong>：</p>
+<ul>
+<li>shared part of the model: word embedding；</li>
+<li>没有unsupervised-only部分；</li>
+<li>supervised-only部分是除去word embedding 之外的模型；</li>
+</ul>
+<p>下面考虑一下，为何<strong>pre-training</strong>这种策略可以work呢？</p>
+<p>其实可以将这种预训练当做有监督学习模型的一种更加<strong>智能</strong>的初始化。换句话说，此时输入模型的不再是raw data，需要模型从中自主学习诸如词义、句义等相关表示，而是直接将这种表示直接作为输入塞入模型。</p>
+<p><img src="http://ww1.sinaimg.cn/large/a0ca074cgy1ftipd1f38ej20mp0atabc.jpg" alt></p>
+<p>具体应用到NLP中，“预训练”这种策略是如何生效的呢？一般来说，大多数基于神经网络的NLP应用框架如下所示：</p>
+<p><img src="http://ww1.sinaimg.cn/large/a0ca074cgy1ftir5slb5mj20dy0fl75h.jpg" alt></p>
+<p>这里<code>Embedding loookup</code>层一般对应于这里的预训练层，当然，目前也有一些其他模型会区分<code>pre-trained encoder</code>和<code>supervised encoder</code>。</p>
+<p>下面介绍三种pre-training的策略：</p>
+<h3 id="1-Auto-encoder"><a href="#1-Auto-encoder" class="headerlink" title="1) Auto-encoder"></a>1) Auto-encoder</h3><p>这里应用自编码机的最主要目的是为了获取输入数据中最核心的信息，而<strong>“核心信息”</strong>的定义这里是基于一个假设：可以被无损重构的信息。在训练完成Auto-encoder之后，去除decoder部分，直接把encoder的结果作为后续神经网络的输入即可。框架如下：</p>
+<p><img src="http://ww1.sinaimg.cn/large/a0ca074cgy1ftiri528utj20jw09sdgy.jpg" alt></p>
+<h3 id="2-CoVe"><a href="#2-CoVe" class="headerlink" title="2) CoVe"></a>2) CoVe</h3><h3 id="3-ELMo"><a href="#3-ELMo" class="headerlink" title="3) ELMo"></a>3) ELMo</h3><h2 id="2-Self-training"><a href="#2-Self-training" class="headerlink" title="2. Self-training"></a>2. Self-training</h2><h2 id="3-Consistency-regularization"><a href="#3-Consistency-regularization" class="headerlink" title="3. Consistency regularization"></a>3. Consistency regularization</h2>
+    </div>
+
+    
+    
+    
+        
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/NLP/" rel="tag"># NLP</a>
+            
+              <a href="/tags/semi-supervised-learning/" rel="tag"># semi-supervised learning</a>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+                <a href="/2017/08/06/understanding-Learning-to-Rank/" rel="next" title="理解Learning to Rank算法">
+                  <i class="fa fa-chevron-left"></i> 理解Learning to Rank算法
+                </a>
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+                <a href="/2018/10/26/BERT/" rel="prev" title="BERT">
+                  BERT <i class="fa fa-chevron-right"></i>
+                </a>
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+    
+  <div class="comments" id="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+  
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+        
+        
+        
+        
+      
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Semi-supervised-learning-on-NLP"><span class="nav-number">1.</span> <span class="nav-text">Semi-supervised learning on NLP</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Pre-training"><span class="nav-number">1.1.</span> <span class="nav-text">1. Pre-training</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Auto-encoder"><span class="nav-number">1.1.1.</span> <span class="nav-text">1) Auto-encoder</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-CoVe"><span class="nav-number">1.1.2.</span> <span class="nav-text">2) CoVe</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-ELMo"><span class="nav-number">1.1.3.</span> <span class="nav-text">3) ELMo</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Self-training"><span class="nav-number">1.2.</span> <span class="nav-text">2. Self-training</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Consistency-regularization"><span class="nav-number">1.3.</span> <span class="nav-text">3. Consistency regularization</span></a></li></ol></li></ol></div>
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">小石头</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span>
+        </a>
+      </div>
+    
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="https://github.com/usakey" title="GitHub &rarr; https://github.com/usakey" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+    
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="mailto:rdxiaolei@gmail.com" title="E-Mail &rarr; mailto:rdxiaolei@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+    
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">小石头</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">
+      
+    主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.4.1
+  </div>
+
+        
+
+
+
+
+
+
+  
+  <script>
+  function leancloudSelector(url) {
+    return document.getElementById(url).querySelector('.leancloud-visitors-count');
+  }
+  if (CONFIG.page.isPost) {
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = visitors.getAttribute('id').trim();
+      var title = visitors.getAttribute('data-flag-title').trim();
+
+      Counter('get', `/classes/Counter?where=${JSON.stringify({ url })}`)
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .then(response => response.json())
+              .then(() => {
+                leancloudSelector(url).innerText = counter.time + 1;
+              })
+            
+              .catch(error => {
+                console.log('Failed to save visitor count', error);
+              })
+          } else {
+              leancloudSelector(url).innerText = 'Counter not initialized! More info at console err msg.';
+              console.error('ATTENTION! LeanCloud counter has security bug, see how to solve it here: https://github.com/theme-next/hexo-leancloud-counter-security. \n However, you can still use LeanCloud without security, by setting `security` option to `false`.');
+            
+          }
+        })
+        .catch(error => {
+          console.log('LeanCloud Counter Error', error);
+        });
+    }
+  } else {
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return element.getAttribute('id').trim();
+      });
+
+      Counter('get', `/classes/Counter?where=${JSON.stringify({ url: { '$in': entries } })}`)
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length === 0) {
+            document.querySelectorAll('.leancloud_visitors .leancloud-visitors-count').forEach(element => {
+              element.innerText = 0;
+            });
+            return;
+          }
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            leancloudSelector(url).innerText = time;
+          }
+          for (var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = leancloudSelector(url);
+            if (element.innerText == '') {
+              element.innerText = 0;
+            }
+          }
+        })
+        .catch(error => {
+          console.log('LeanCloud Counter Error', error);
+        });
+    }
+  }
+
+  fetch('https://app-router.leancloud.cn/2/route?appId=Bw8rAxLf1cue3IcvXcEXknfi-gzGzoHsz')
+    .then(response => response.json())
+    .then(({ api_server }) => {
+      var Counter = (method, url, data) => {
+        return fetch(`https://${api_server}/1.1${url}`, {
+          method: method,
+          headers: {
+            'X-LC-Id': 'Bw8rAxLf1cue3IcvXcEXknfi-gzGzoHsz',
+            'X-LC-Key': 'nibkM8GWAjLXcRWeNqIpj5yh',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        const localhost = /http:\/\/(localhost|127.0.0.1|0.0.0.0)/;
+        if (localhost.test(document.URL)) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.4.1"></script><script src="/js/motion.js?v=7.4.1"></script>
+<script src="/js/schemes/muse.js?v=7.4.1"></script>
+<script src="/js/next-boot.js?v=7.4.1"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="/js/local-search.js?v=7.4.1"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://xiaoleixu.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  function disqus_config() {
+    this.page.url = "http://yoursite.com/2018/03/22/semi-supervised-learning-in-NLP/";
+    this.page.identifier = "2018/03/22/semi-supervised-learning-in-NLP/";
+    this.page.title = 'semi-supervised learning in NLP';
+  }
+  function loadComments() {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://xiaoleixu.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  }
+    window.addEventListener('load', loadComments, false);
+  
+</script>
+
+</body>
+</html>

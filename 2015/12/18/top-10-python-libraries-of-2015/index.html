@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.4.1">
+  <link rel="mask-icon" href="/images/logo.svg?v=7.4.1" color="#222">
+
+<link rel="stylesheet" href="/css/main.css?v=7.4.1">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.4.1',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="来源：http://blog.tryolabs.com/2015/12/15/top-10-python-libraries-of-2015/作者：Alan翻译：Louis Xu   随着新的一年即将到来，我们常常坐下来思考到底2015年我们做了些什么。毋庸置疑，如果不是基于开源社区的伟大贡献，我们很多的项目不会像现在这样成功，更不会提供出如此多可靠的，经过实践检验的开发库。">
+<meta name="keywords" content="python">
+<meta property="og:type" content="article">
+<meta property="og:title" content="2015年排名前10的Python开发库">
+<meta property="og:url" content="http://yoursite.com/2015/12/18/top-10-python-libraries-of-2015/index.html">
+<meta property="og:site_name" content="随想空间">
+<meta property="og:description" content="来源：http://blog.tryolabs.com/2015/12/15/top-10-python-libraries-of-2015/作者：Alan翻译：Louis Xu   随着新的一年即将到来，我们常常坐下来思考到底2015年我们做了些什么。毋庸置疑，如果不是基于开源社区的伟大贡献，我们很多的项目不会像现在这样成功，更不会提供出如此多可靠的，经过实践检验的开发库。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-07-18T04:58:19.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="2015年排名前10的Python开发库">
+<meta name="twitter:description" content="来源：http://blog.tryolabs.com/2015/12/15/top-10-python-libraries-of-2015/作者：Alan翻译：Louis Xu   随着新的一年即将到来，我们常常坐下来思考到底2015年我们做了些什么。毋庸置疑，如果不是基于开源社区的伟大贡献，我们很多的项目不会像现在这样成功，更不会提供出如此多可靠的，经过实践检验的开发库。">
+  <link rel="canonical" href="http://yoursite.com/2015/12/18/top-10-python-libraries-of-2015/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>2015年排名前10的Python开发库 | 随想空间</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7db625a1dcd8f7a1d33faaf2d5cf0a59";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随想空间</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+        
+        
+        <li class="menu-item menu-item-home">
+      
+    
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+      
+    
+      
+      
+        
+        
+        <li class="menu-item menu-item-categories">
+      
+    
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+      
+    
+      
+      
+        
+        
+        <li class="menu-item menu-item-tags">
+      
+    
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+      
+    
+      
+      
+        
+        
+        <li class="menu-item menu-item-archives">
+      
+    
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      
+    
+      
+      
+        
+        
+        <li class="menu-item menu-item-about">
+      
+    
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      
+    
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger">
+        
+          <i class="fa fa-search fa-fw"></i>
+        
+        搜索
+        </a>
+      </li>
+    
+  </ul>
+
+    
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/12/18/top-10-python-libraries-of-2015/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="小石头">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随想空间">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            2015年排名前10的Python开发库
+            
+
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2015-12-18 12:20:00" itemprop="dateCreated datePublished" datetime="2015-12-18T12:20:00+08:00">2015-12-18</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2018-07-18 12:58:19" itemprop="dateModified" datetime="2018-07-18T12:58:19+08:00">2018-07-18</time>
+              </span>
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            <span id="/2015/12/18/top-10-python-libraries-of-2015/" class="post-meta-item leancloud_visitors" data-flag-title="2015年排名前10的Python开发库" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+        
+      
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2015/12/18/top-10-python-libraries-of-2015/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2015/12/18/top-10-python-libraries-of-2015/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>来源：<a href="http://blog.tryolabs.com/2015/12/15/top-10-python-libraries-of-2015/" target="_blank" rel="noopener">http://blog.tryolabs.com/2015/12/15/top-10-python-libraries-of-2015/</a><br>作者：Alan<br>翻译：Louis Xu  </p>
+<p>随着新的一年即将到来，我们常常坐下来思考到底2015年我们做了些什么。毋庸置疑，如果不是基于开源社区的伟大贡献，我们很多的项目不会像现在这样成功，更不会提供出如此多可靠的，经过实践检验的开发库。</p>
+<a id="more"></a>
+<p>似乎很多人都在写他们心目中排名前10的列表，当然我们也不能免俗。下面介绍的是我们在2015年使用过的10个最好的Python库，我们觉得有义务让大家都熟悉他们（以下排名不分先后）。我们也会避免介绍那些太过出名的库，诸如Django, Flask, Django Rest框架等，而是将重点放在那些不太为大家所熟知的开发库上。详情如下：</p>
+<ol>
+<li><p>jupyter<br>试想一下，如果让一个画家在创作的时候不能立刻看到自己的画作，他的内心会如何抓狂。Jupyter Notebooks正是为了解决编写代码的时候遇到的类似问题。它使得代码，绘图和程序运行的结果可以更加直观地展现出来，而且它正越来越成为数据科学家们偏爱的工具库。所谓的Notebook就是代码和对应文档组合在一起的文档，基于这个特性，它是我们快速创建原型或者教程的得心应手的工具。<br>尽管我们仅仅将jupyter用来编写Python代码，但是截至目前，它已经添加了针对其他编程语言诸如Julia和Haskell的支持。</p>
+</li>
+<li><p>retrying<br>顾名思义，retrying库可以帮你避免一切不必要的重复劳动：它为你实现了重试的行为。它提供了一个通用的修饰器，这使得它能够毫不费力地赋予任何方法重试的能力，同时你可以对各种各样的属性进行配置以获得所需的重试行为。比如最多尝试次数，延迟，回退休眠，错误条件等等。它既轻量级又使用方便。</p>
+</li>
+<li><p>aiohttp<br>截至2015年，最重要的开发库都被移植到了Python 3，所以我们也开始拥抱这种趋势。我们非常喜欢使用asyncio包通过协同程序(coroutines)来编写并发程序，所以我们有必要有一个使用相同并发模式的HTTP客户端（比如HTTP请求）和服务器端。aiohttp开发库正是这样一个为asyncio提供了易于使用的HTTP客户机/服务器的开发库。</p>
+</li>
+<li><p>Plumbum<br>为了能够在Python程序里调用其他脚本或者可执行文件，我们已经尝试了多种将subprocess打包的方法，但是随着plumbum模式的出现，之前的方法都已无用武之地。<br>通过一个易于使用的语法，你可以执行本地或者远程的命令，从而以跨平台的方式得到输出结果或者错误代码。如果这些还无法满足需求，你可以通过组合的方式（按照shell管道的方式）和一个界面来创建命令行应用程序。不妨一试！</p>
+</li>
+<li><p>Phonenumbers<br>和电话号码打交道以及验证电话号码是一件真正痛苦的事情，因为这需要考虑国际冠码和区号，而且可能还有其他需要考虑的事情。该phonenumbers开发库是基于Google的libphonenumber移植而来并通过Python实现，值得庆幸的是该库大大简化了Google的libphonenumber库。它可以通过少量代码来用于解析，格式化和验证电话号码。更重要的是，phonenumbers可以区分一个电话号码是否是独一无二的(遵循E.164格式)。它同时适用于Python 2和Python 3。<br>我们已经在很多项目中广泛使用了这个库，主要是通过它和django-phonenumber-field接口的结合来解决几乎一直弹出的繁琐问题。</p>
+</li>
+<li><p>Networkx<br>图和网络通常用于许多不同的场景，例如组织数据或者展示数据流，抑或展示不同数据实体间的关系。利用Networkx可以创建并操作图和网络。Networkx使用的算法使其具有高可扩展性，该特性使得当处理复杂的图结构时它成为一个理想的选择。此外，大量的图渲染选项也使得它成为一款非常出色的可视化工具。</p>
+</li>
+<li><p>Influxdb<br>如果你正在考虑将数据负载以时间序列为基础进行存储，那么InfluxDB是你需要考虑的工具。<br>InfluxDB是一款时间序列数据库，一直以来，我们都在用它存储测量结果。只需要通过一个RESTful的API，我们可以轻易并有效地使用它。当谈论到大数据量的时候，这点尤为重要。此外，其内置的集群功能使得检索和数据分组都变得容易。这种官方的客户端通过调用API的方式抽象出了大部分的核心工作，尽管如此，我们还是希望看到它能够进一步改进成以Python化的方式来进行查询，而不是通过写原始的JSON来实现。</p>
+</li>
+<li><p>elasticsearch-dsl<br>如果你曾经使用过Elasticsearch，那你在检查冗长的JSON格式的查询语句时一定备受煎熬，浪费了大把时间想要找出到底是什么地方的解析出现了错误。Elasticsearch DSL客户端是完全建立在官方的Elasticsearch客户端基础之上，同时让你不需要被JSON语句的问题所困扰：你只需要使用Python定义的类或者类查询集的表达式即可。它还提供包装能够让你将文档作为Python的对象，映射关系等来进行处理。</p>
+</li>
+<li><p>Keras<br>深度学习是当前新的趋势，而这正是keras闪光的地方。它可以在Theano上运行，并可以通过各种神经网络的架构来进行快速实验。通过高度模块化和简约性，它可以在CPU和GPU上无缝运行。针对2015年度我们所解决的一些研发项目，类似keras这样的一个组成部分是至关紧要的。</p>
+</li>
+<li><p>Genism<br>如果你对自然语言处理(NLP)感兴趣但是还没听说过Gensim，那你真是太与世隔绝了。它提供了一些最常用算法的快速，可扩展(独立内存)的实现，诸如tf-idf, word2vec, doc2vec, LSA等等，同时提供了一个易于使用且有据可查的接口。</p>
+</li>
+</ol>
+<p>最后的彩蛋: MonkeyLearn Python  </p>
+<p>最后我们不能不考虑MonkeyLearn开发库。它是Tryolabs出品的一款分支于自己公司的产品，它通过一个易于使用的RESTFul的API提供了云端的文本挖掘。通过它你可以得到诸如情绪观点，最重要的关键字的深入理解，还可以进行主题检测，以及其他一切你可以通过自定义的文本分类器可以做到的事情。MonkeyLearn Python是这个API的官方客户端，它同时支持Python 2和Python 3。</p>
+
+    </div>
+
+    
+    
+    
+        
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/python/" rel="tag"># python</a>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+                <a href="/2017/08/06/understanding-Learning-to-Rank/" rel="prev" title="理解Learning to Rank算法">
+                  理解Learning to Rank算法 <i class="fa fa-chevron-right"></i>
+                </a>
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+    
+  <div class="comments" id="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+  
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+        
+        
+        
+        
+      
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">小石头</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span>
+        </a>
+      </div>
+    
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="https://github.com/usakey" title="GitHub &rarr; https://github.com/usakey" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+    
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="mailto:rdxiaolei@gmail.com" title="E-Mail &rarr; mailto:rdxiaolei@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+    
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">小石头</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">
+      
+    主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.4.1
+  </div>
+
+        
+
+
+
+
+
+
+  
+  <script>
+  function leancloudSelector(url) {
+    return document.getElementById(url).querySelector('.leancloud-visitors-count');
+  }
+  if (CONFIG.page.isPost) {
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = visitors.getAttribute('id').trim();
+      var title = visitors.getAttribute('data-flag-title').trim();
+
+      Counter('get', `/classes/Counter?where=${JSON.stringify({ url })}`)
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .then(response => response.json())
+              .then(() => {
+                leancloudSelector(url).innerText = counter.time + 1;
+              })
+            
+              .catch(error => {
+                console.log('Failed to save visitor count', error);
+              })
+          } else {
+              leancloudSelector(url).innerText = 'Counter not initialized! More info at console err msg.';
+              console.error('ATTENTION! LeanCloud counter has security bug, see how to solve it here: https://github.com/theme-next/hexo-leancloud-counter-security. \n However, you can still use LeanCloud without security, by setting `security` option to `false`.');
+            
+          }
+        })
+        .catch(error => {
+          console.log('LeanCloud Counter Error', error);
+        });
+    }
+  } else {
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return element.getAttribute('id').trim();
+      });
+
+      Counter('get', `/classes/Counter?where=${JSON.stringify({ url: { '$in': entries } })}`)
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length === 0) {
+            document.querySelectorAll('.leancloud_visitors .leancloud-visitors-count').forEach(element => {
+              element.innerText = 0;
+            });
+            return;
+          }
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            leancloudSelector(url).innerText = time;
+          }
+          for (var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = leancloudSelector(url);
+            if (element.innerText == '') {
+              element.innerText = 0;
+            }
+          }
+        })
+        .catch(error => {
+          console.log('LeanCloud Counter Error', error);
+        });
+    }
+  }
+
+  fetch('https://app-router.leancloud.cn/2/route?appId=Bw8rAxLf1cue3IcvXcEXknfi-gzGzoHsz')
+    .then(response => response.json())
+    .then(({ api_server }) => {
+      var Counter = (method, url, data) => {
+        return fetch(`https://${api_server}/1.1${url}`, {
+          method: method,
+          headers: {
+            'X-LC-Id': 'Bw8rAxLf1cue3IcvXcEXknfi-gzGzoHsz',
+            'X-LC-Key': 'nibkM8GWAjLXcRWeNqIpj5yh',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        const localhost = /http:\/\/(localhost|127.0.0.1|0.0.0.0)/;
+        if (localhost.test(document.URL)) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.4.1"></script><script src="/js/motion.js?v=7.4.1"></script>
+<script src="/js/schemes/muse.js?v=7.4.1"></script>
+<script src="/js/next-boot.js?v=7.4.1"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="/js/local-search.js?v=7.4.1"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://xiaoleixu.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  function disqus_config() {
+    this.page.url = "http://yoursite.com/2015/12/18/top-10-python-libraries-of-2015/";
+    this.page.identifier = "2015/12/18/top-10-python-libraries-of-2015/";
+    this.page.title = '2015年排名前10的Python开发库';
+  }
+  function loadComments() {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://xiaoleixu.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  }
+    window.addEventListener('load', loadComments, false);
+  
+</script>
+
+</body>
+</html>

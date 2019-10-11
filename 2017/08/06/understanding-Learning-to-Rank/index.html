@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.4.1">
+  <link rel="mask-icon" href="/images/logo.svg?v=7.4.1" color="#222">
+
+<link rel="stylesheet" href="/css/main.css?v=7.4.1">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.4.1',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="排序学习是一个有监督的机器学习过程，对每一个给定的查询－文档对，抽取特征，通过日志挖掘或者人工标注的方法获得真实数据标注。然后通过排序模型，使得输入能够和实际的数据相似。">
+<meta name="keywords" content="Machine Learning">
+<meta property="og:type" content="article">
+<meta property="og:title" content="理解Learning to Rank算法">
+<meta property="og:url" content="http://yoursite.com/2017/08/06/understanding-Learning-to-Rank/index.html">
+<meta property="og:site_name" content="随想空间">
+<meta property="og:description" content="排序学习是一个有监督的机器学习过程，对每一个给定的查询－文档对，抽取特征，通过日志挖掘或者人工标注的方法获得真实数据标注。然后通过排序模型，使得输入能够和实际的数据相似。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://kubicode.me/img/Learning-To-Rank-Base-Knowledge/lrt_framework.png">
+<meta property="og:updated_time" content="2018-07-18T06:01:52.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="理解Learning to Rank算法">
+<meta name="twitter:description" content="排序学习是一个有监督的机器学习过程，对每一个给定的查询－文档对，抽取特征，通过日志挖掘或者人工标注的方法获得真实数据标注。然后通过排序模型，使得输入能够和实际的数据相似。">
+<meta name="twitter:image" content="http://kubicode.me/img/Learning-To-Rank-Base-Knowledge/lrt_framework.png">
+  <link rel="canonical" href="http://yoursite.com/2017/08/06/understanding-Learning-to-Rank/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>理解Learning to Rank算法 | 随想空间</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7db625a1dcd8f7a1d33faaf2d5cf0a59";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">随想空间</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+        
+        
+        <li class="menu-item menu-item-home">
+      
+    
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+      
+    
+      
+      
+        
+        
+        <li class="menu-item menu-item-categories">
+      
+    
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+      
+    
+      
+      
+        
+        
+        <li class="menu-item menu-item-tags">
+      
+    
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+      
+    
+      
+      
+        
+        
+        <li class="menu-item menu-item-archives">
+      
+    
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      
+    
+      
+      
+        
+        
+        <li class="menu-item menu-item-about">
+      
+    
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      
+    
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger">
+        
+          <i class="fa fa-search fa-fw"></i>
+        
+        搜索
+        </a>
+      </li>
+    
+  </ul>
+
+    
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/06/understanding-Learning-to-Rank/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="小石头">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="随想空间">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            理解Learning to Rank算法
+            
+
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2017-08-06 13:55:19" itemprop="dateCreated datePublished" datetime="2017-08-06T13:55:19+08:00">2017-08-06</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2018-07-18 14:01:52" itemprop="dateModified" datetime="2018-07-18T14:01:52+08:00">2018-07-18</time>
+              </span>
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Machine-learning/" itemprop="url" rel="index">
+                    <span itemprop="name">Machine learning</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            <span id="/2017/08/06/understanding-Learning-to-Rank/" class="post-meta-item leancloud_visitors" data-flag-title="理解Learning to Rank算法" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+        
+      
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2017/08/06/understanding-Learning-to-Rank/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2017/08/06/understanding-Learning-to-Rank/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>排序学习是一个有监督的机器学习过程，对每一个给定的查询－文档对，抽取特征，通过日志挖掘或者人工标注的方法获得真实数据标注。然后通过排序模型，使得输入能够和实际的数据相似。</p>
+<p><img src="http://kubicode.me/img/Learning-To-Rank-Base-Knowledge/lrt_framework.png" alt="image"></p>
+<a id="more"></a>
+<h3 id="1-LTR的流程"><a href="#1-LTR的流程" class="headerlink" title="1. LTR的流程"></a>1. LTR的流程</h3><ul>
+<li>Collect Training Data (Queries and their labeled documents) </li>
+<li>Feature Extraction for Query-document Pairs</li>
+<li>Learning the Ranking Model by Minimizing a Loss Function on the Training Data</li>
+<li>Use the Model to Answer Online Queries</li>
+</ul>
+<h3 id="2-训练数据的获取"><a href="#2-训练数据的获取" class="headerlink" title="2. 训练数据的获取"></a>2. 训练数据的获取</h3><p>有2种获取训练数据的来源:1）人工标注；2）搜索日志。</p>
+<ul>
+<li>1) 人工标注</li>
+</ul>
+<p>从搜索日志中随机选取一部分Query，让受过专业训练的数据评估员对”Query-Url对”给出相关性判断。常见的是5档的评分:差、一般、好、优秀、完美。以此作为训练数据。人工标注是标注者的主观判断，会受标注者背景知识等因素的影响。</p>
+<ul>
+<li>2) 搜索日志</li>
+</ul>
+<p>使用点击日志的偏多。比如，结果ABC分别位于123位，B比A位置低，但却得到了更多的点击，<br>那么B的相关性可能好于A。</p>
+<ul>
+<li>3) 公开数据集</li>
+</ul>
+<p>现存一批公开的数据集可以使用</p>
+<blockquote>
+<ul>
+<li>LETOR, <a href="http://research.microsoft.com/en-us/um/beijing/projects/letor/" target="_blank" rel="noopener">http://research.microsoft.com/en-us/um/beijing/projects/letor/</a></li>
+<li>Microsoft Learning to Rank Dataset, <a href="http://research.microsoft.com/en-us/projects/mslr/" target="_blank" rel="noopener">http://research.microsoft.com/en-us/projects/mslr/</a></li>
+<li>Yahoo Learning to Rank Challenge, <a href="http://webscope.sandbox.yahoo.com/" target="_blank" rel="noopener">http://webscope.sandbox.yahoo.com/</a></li>
+</ul>
+</blockquote>
+<h3 id="3-特征提取（特征工程）"><a href="#3-特征提取（特征工程）" class="headerlink" title="3. 特征提取（特征工程）"></a>3. 特征提取（特征工程）</h3><p>搜索引擎会使用一系列特征来决定结果的排序。</p>
+<p>feature可以分为：</p>
+<ul>
+<li>Doc本身的特征：Pagerank、内容丰富度、是否是spam等</li>
+<li>Query-Doc的特征：文本相关性、query和doc共现的词在文档/查询中出现的次数等</li>
+</ul>
+<p>此阶段就是要抽取出所有的特征，供后续训练使用。（一般是最耗时间和最影响模型结果的步骤）</p>
+<h3 id="4-模型"><a href="#4-模型" class="headerlink" title="4. 模型"></a>4. 模型</h3><p>常用的排序学习分为三种类型：PointWise，PairWise和ListWise。</p>
+<h4 id="PointWise"><a href="#PointWise" class="headerlink" title="PointWise"></a>PointWise</h4><p>输入：单独的一篇文档</p>
+<p>过程：文档-&gt;特征向量-&gt;模型得到回归/分类结果</p>
+<p>输出：根据模型得到的文档的score；然后根据score排序。</p>
+<p>优点:<br>速度快，复杂度低.</p>
+<p>缺点:<br>效果一般<br>没有考虑到文档之间的相对关系<br>忽略了文档相关度与查询的关联，比如Top Query排在后面的相关性比Tial Query排在前面的都要高，导致训练样本不一致</p>
+<h4 id="PairWise"><a href="#PairWise" class="headerlink" title="PairWise"></a>PairWise</h4><p>对于搜索任务来说，系统接收到用户查询后，返回相关文档列表，所以问题的关键是确定文档之间的先后相对顺序关系，<br>而Pairwise则将重点转向对文档关系是否合理的判断.</p>
+<p>虽然Pairwise方法对Pointwise方法做了改进，但是也明显存在两个问题:</p>
+<ul>
+<li>只考虑了两个文档的先后顺序，没有考虑文档出现在搜索列表中的位置</li>
+<li>不同的查询，其相关文档数量差异很大，转换为文档对之后，有的查询可能有几百对文档，有的可能只有几十个，最终对机器学习的效果评价造成困难</li>
+</ul>
+<h4 id="ListWise"><a href="#ListWise" class="headerlink" title="ListWise"></a>ListWise</h4><p>与Pointwise和Pairwise不同，Listwise是将一个查询对应的所有搜索结果列表作为一个训练实例，因此也称为文档列方法.</p>
+<h3 id="5-模型评估"><a href="#5-模型评估" class="headerlink" title="5. 模型评估"></a>5. 模型评估</h3><ul>
+<li>MAP</li>
+</ul>
+<p>MAP(Mean Average Precision)表示文档在排序中的平均精度均值，是用于衡量个query查询见过的平均精度值AP,<br>系统检索出来的相关文档越靠前(rank 越高)，MAP就可能越高。如果系统没有返回相关文档，则准确率默认为0。</p>
+<ul>
+<li>NDCG</li>
+</ul>
+<p>NDCG表示表示归一化折损累积增益，主要是衡量实际相关性越高的文档排在越前面</p>
+<h3 id="5-综述"><a href="#5-综述" class="headerlink" title="5. 综述"></a>5. 综述</h3><p>搜索引擎时敲定特征分的权重是非常疼的一件事儿，而LTR正好帮你定分，LTR的三种实现方法其实各有优劣：</p>
+<ul>
+<li>难点主要在训练样本的构建(人工或者挖日志)，另外就是训练复杂</li>
+<li>虽说Listwise效果最好，pointwise使用还是比较多，参考这篇文章<a href="http://www.cnblogs.com/zjgtan/p/3652689.html" target="_blank" rel="noopener">综述LTR</a>体验下</li>
+<li>在工业界用的比较多的应该还是Pairwise，因为他构建训练样本相对方便，并且复杂度也还可以，所以Rank SVM就很火</li>
+</ul>
+<h3 id="结合ES和LTR"><a href="#结合ES和LTR" class="headerlink" title="结合ES和LTR"></a>结合ES和LTR</h3><p><a href="https://github.com/o19s/elasticsearch-learning-to-rank" target="_blank" rel="noopener">https://github.com/o19s/elasticsearch-learning-to-rank</a></p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a href="http://blog.csdn.net/LG1259156776/article/details/52749851" target="_blank" rel="noopener">参考资料-1</a></p>
+<p><a href="http://kubicode.me/2016/02/15/Machine%20Learning/Learning-To-Rank-Base-Knowledge/" target="_blank" rel="noopener">参考资料-2</a></p>
+
+    </div>
+
+    
+    
+    
+        
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+                <a href="/2015/12/18/top-10-python-libraries-of-2015/" rel="next" title="2015年排名前10的Python开发库">
+                  <i class="fa fa-chevron-left"></i> 2015年排名前10的Python开发库
+                </a>
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+                <a href="/2018/03/22/semi-supervised-learning-in-NLP/" rel="prev" title="semi-supervised learning in NLP">
+                  semi-supervised learning in NLP <i class="fa fa-chevron-right"></i>
+                </a>
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+    
+  <div class="comments" id="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+  
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+        
+        
+        
+        
+      
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-LTR的流程"><span class="nav-number">1.</span> <span class="nav-text">1. LTR的流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-训练数据的获取"><span class="nav-number">2.</span> <span class="nav-text">2. 训练数据的获取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-特征提取（特征工程）"><span class="nav-number">3.</span> <span class="nav-text">3. 特征提取（特征工程）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-模型"><span class="nav-number">4.</span> <span class="nav-text">4. 模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#PointWise"><span class="nav-number">4.1.</span> <span class="nav-text">PointWise</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PairWise"><span class="nav-number">4.2.</span> <span class="nav-text">PairWise</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ListWise"><span class="nav-number">4.3.</span> <span class="nav-text">ListWise</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-模型评估"><span class="nav-number">5.</span> <span class="nav-text">5. 模型评估</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-综述"><span class="nav-number">6.</span> <span class="nav-text">5. 综述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#结合ES和LTR"><span class="nav-number">7.</span> <span class="nav-text">结合ES和LTR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li></ol></div>
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">小石头</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span>
+        </a>
+      </div>
+    
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="https://github.com/usakey" title="GitHub &rarr; https://github.com/usakey" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+    
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="mailto:rdxiaolei@gmail.com" title="E-Mail &rarr; mailto:rdxiaolei@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+    
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">小石头</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">
+      
+    主题 – <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.4.1
+  </div>
+
+        
+
+
+
+
+
+
+  
+  <script>
+  function leancloudSelector(url) {
+    return document.getElementById(url).querySelector('.leancloud-visitors-count');
+  }
+  if (CONFIG.page.isPost) {
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = visitors.getAttribute('id').trim();
+      var title = visitors.getAttribute('data-flag-title').trim();
+
+      Counter('get', `/classes/Counter?where=${JSON.stringify({ url })}`)
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .then(response => response.json())
+              .then(() => {
+                leancloudSelector(url).innerText = counter.time + 1;
+              })
+            
+              .catch(error => {
+                console.log('Failed to save visitor count', error);
+              })
+          } else {
+              leancloudSelector(url).innerText = 'Counter not initialized! More info at console err msg.';
+              console.error('ATTENTION! LeanCloud counter has security bug, see how to solve it here: https://github.com/theme-next/hexo-leancloud-counter-security. \n However, you can still use LeanCloud without security, by setting `security` option to `false`.');
+            
+          }
+        })
+        .catch(error => {
+          console.log('LeanCloud Counter Error', error);
+        });
+    }
+  } else {
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return element.getAttribute('id').trim();
+      });
+
+      Counter('get', `/classes/Counter?where=${JSON.stringify({ url: { '$in': entries } })}`)
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length === 0) {
+            document.querySelectorAll('.leancloud_visitors .leancloud-visitors-count').forEach(element => {
+              element.innerText = 0;
+            });
+            return;
+          }
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            leancloudSelector(url).innerText = time;
+          }
+          for (var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = leancloudSelector(url);
+            if (element.innerText == '') {
+              element.innerText = 0;
+            }
+          }
+        })
+        .catch(error => {
+          console.log('LeanCloud Counter Error', error);
+        });
+    }
+  }
+
+  fetch('https://app-router.leancloud.cn/2/route?appId=Bw8rAxLf1cue3IcvXcEXknfi-gzGzoHsz')
+    .then(response => response.json())
+    .then(({ api_server }) => {
+      var Counter = (method, url, data) => {
+        return fetch(`https://${api_server}/1.1${url}`, {
+          method: method,
+          headers: {
+            'X-LC-Id': 'Bw8rAxLf1cue3IcvXcEXknfi-gzGzoHsz',
+            'X-LC-Key': 'nibkM8GWAjLXcRWeNqIpj5yh',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        const localhost = /http:\/\/(localhost|127.0.0.1|0.0.0.0)/;
+        if (localhost.test(document.URL)) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.4.1"></script><script src="/js/motion.js?v=7.4.1"></script>
+<script src="/js/schemes/muse.js?v=7.4.1"></script>
+<script src="/js/next-boot.js?v=7.4.1"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="/js/local-search.js?v=7.4.1"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://xiaoleixu.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  function disqus_config() {
+    this.page.url = "http://yoursite.com/2017/08/06/understanding-Learning-to-Rank/";
+    this.page.identifier = "2017/08/06/understanding-Learning-to-Rank/";
+    this.page.title = '理解Learning to Rank算法';
+  }
+  function loadComments() {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://xiaoleixu.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  }
+    window.addEventListener('load', loadComments, false);
+  
+</script>
+
+</body>
+</html>
